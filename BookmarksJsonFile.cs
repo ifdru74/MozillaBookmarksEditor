@@ -10,6 +10,18 @@ using System.Text.RegularExpressions;
 
 namespace MozillaBookmarksEditor
 {
+    public enum BookmarkField
+    {
+        Title,
+        Guid,
+        IconUri,
+        Type,
+        Uri,
+        Root,
+        Keyword,
+        Label,
+        Tags
+    }
     public class Bookmark
     {
         string? Guid;

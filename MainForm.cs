@@ -1,6 +1,7 @@
 using MozillaBookmarksEditor.Properties;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 using System.Xml.Linq;
 
 namespace MozillaBookmarksEditor
@@ -9,8 +10,12 @@ namespace MozillaBookmarksEditor
     {
         BookmarksJsonFile bookmarksJsonFile;
         private ListViewColumnSorter lvwColumnSorter;
+        private Bookmark? editedBookmark;
+        private bool editedBookmarkChanged;
+        private bool editedBookmarkLocked;
         public MainForm()
         {
+            editedBookmarkChanged = editedBookmarkLocked = false;
             bookmarksJsonFile = new BookmarksJsonFile();
             lvwColumnSorter = new ListViewColumnSorter();
             InitializeComponent();
@@ -26,6 +31,7 @@ namespace MozillaBookmarksEditor
                 {
                     bookmarksJsonFile.ReadJsonFile(openFileDialog1.FileName);
                     CreateTreeNode(bookmarksJsonFile.root);
+                    Text = openFileDialog1.FileName;
                 }
                 catch (Exception ex)
                 {
@@ -85,7 +91,7 @@ namespace MozillaBookmarksEditor
                 if (fNode == null) return;
                 if (fNode.Tag == null && fNode.Text == "")
                 {
-                    if (AddChildren(tNode, bookmark) !=-2)
+                    if (AddChildren(tNode, bookmark) != -2)
                     {
                         tNode.Nodes.Remove(fNode);
                     }
@@ -107,7 +113,7 @@ namespace MozillaBookmarksEditor
             txtAddress.Text =
                 txtKeywords.Text =
                 txtLabels.Text =
-                txtName.Text = 
+                txtName.Text =
                 txtTags.Text = "";
             enableGoto();
             listView1.Tag = tNode.Tag;
@@ -138,31 +144,54 @@ namespace MozillaBookmarksEditor
                     }
                 }
             }
+            // fill status bar
+            StringBuilder sb = new StringBuilder();
+            sb.Append(tNode.Text);
+            sb.Insert(0, "/");
+            do
+            {
+                tNode = tNode.Parent;
+                if (tNode != null)
+                {
+                    sb.Insert(0, tNode.Text);
+                    sb.Insert(0, "/");
+                }
+                else
+                {
+                    break;
+                }
+            } while (tNode.Parent != null);
+            toolStripStatusLabel1.Text = sb.ToString();
         }
 
         private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-            if (e.Item == null || !e.IsSelected)
+            editedBookmarkLocked = true;
+            btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+            toolStripDelete.Enabled = deleteToolStripMenuItem.Enabled = (listView1.SelectedIndices.Count > 0);
+            if (e.Item == null || !e.IsSelected || listView1.SelectedItems.Count > 1)
             {
+                editedBookmark = null;
                 txtAddress.Text =
                     txtKeywords.Text =
                     txtLabels.Text =
-                    txtName.Text = 
+                    txtName.Text =
                     txtTags.Text = "";
-                enableGoto();
-                return;
             }
-            toolStripDelete.Enabled = deleteToolStripMenuItem.Enabled = (listView1.SelectedIndices.Count > 0);
+            else
             {
+                editedBookmark = e.Item.Tag as Bookmark;
+                if (editedBookmark != null)
+                {
+                    txtAddress.Text = editedBookmark.uri ?? "";
+                    txtKeywords.Text = editedBookmark.keyword ?? "";
+                    txtLabels.Text = editedBookmark.label ?? "";
+                    txtName.Text = editedBookmark.title ?? "";
+                    txtTags.Text = editedBookmark.tags ?? "";
+                }
             }
-            Bookmark? bookmark = e.Item.Tag as Bookmark;
-            if (bookmark == null) return;
-            txtAddress.Text = bookmark.uri ?? "";
-            txtKeywords.Text = bookmark.keyword ?? "";
-            txtLabels.Text = bookmark.keyword ?? "";
-            txtName.Text = bookmark.title ?? "";
-            txtTags.Text = bookmark.tags ?? "";
             enableGoto();
+            editedBookmarkLocked = false;
         }
         void enableGoto()
         {
@@ -217,7 +246,24 @@ namespace MozillaBookmarksEditor
             {
                 Width = Properties.Settings.Default.Width;
             }
-
+            string wsl = Properties.Settings.Default.listView1;
+            if (wsl.Length > 0)
+            {
+                string[] acw = wsl.Split(',');
+                if (acw != null)
+                {
+                    for (int i = 0; i < acw.Length; i++)
+                    {
+                        if (int.TryParse(acw[i], out int value))
+                        {
+                            if (value > 0)
+                            {
+                                listView1.Columns[i].Width = value;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -228,6 +274,15 @@ namespace MozillaBookmarksEditor
             Properties.Settings.Default.Left = Left;
             Properties.Settings.Default.Height = Height;
             Properties.Settings.Default.Width = Width;
+            StringBuilder sb = new StringBuilder();
+            for (int i= 0; i<listView1.Columns.Count; i++) {
+                if (i!=0)
+                {
+                    sb.Append(",");
+                }
+                sb.Append(listView1.Columns[i].Width.ToString());
+            }
+            Properties.Settings.Default.listView1 = sb.ToString();
             Properties.Settings.Default.Save();
         }
 
@@ -262,6 +317,7 @@ namespace MozillaBookmarksEditor
                 try
                 {
                     bookmarksJsonFile.WriteJsonFile(saveFileDialog1.FileName, root);
+                    Text = saveFileDialog1.FileName;
                 }
                 catch (Exception ex)
                 {
@@ -273,7 +329,7 @@ namespace MozillaBookmarksEditor
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             // Determine if clicked column is already the column that is being sorted.
-            if(lvwColumnSorter!= listView1.ListViewItemSorter)
+            if (lvwColumnSorter != listView1.ListViewItemSorter)
             {
                 listView1.ListViewItemSorter = lvwColumnSorter;
             }
@@ -305,6 +361,99 @@ namespace MozillaBookmarksEditor
             catch (Exception)
             {
             }
+        }
+
+        private void txtName_Leave(object sender, EventArgs e)
+        {
+            compareStringFromUI(txtName.Text, BookmarkField.Title);
+        }
+
+        private void txtAddress_Leave(object sender, EventArgs e)
+        {
+            compareStringFromUI(txtAddress.Text, BookmarkField.Uri);
+        }
+        private void compareStringFromUI(string uiVal, BookmarkField field)
+        {
+            if (!editedBookmarkChanged && !editedBookmarkLocked)
+            {
+                if (editedBookmark != null)
+                {
+                    string bmVal = "";
+                    switch (field)
+                    {
+                        case BookmarkField.Title:
+                            bmVal = editedBookmark.title ?? "";
+                            break;
+                        case BookmarkField.Uri:
+                            bmVal = editedBookmark.uri ?? "";
+                            break;
+                        case BookmarkField.Guid:
+                            bmVal = editedBookmark.guid ?? "";
+                            break;
+                        case BookmarkField.Label:
+                            bmVal = editedBookmark.label ?? "";
+                            break;
+                        case BookmarkField.IconUri:
+                            bmVal = editedBookmark.iconUri ?? "";
+                            break;
+                        case BookmarkField.Keyword:
+                            bmVal = editedBookmark.keyword ?? "";
+                            break;
+                        case BookmarkField.Root:
+                            bmVal = editedBookmark.root ?? "";
+                            break;
+                        case BookmarkField.Type:
+                            bmVal = editedBookmark.type ?? "";
+                            break;
+                    }
+                    if (uiVal != bmVal)
+                    {
+                        btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = true;
+                    }
+                }
+            }
+        }
+        private void txtLabels_Leave(object sender, EventArgs e)
+        {
+            compareStringFromUI(txtLabels.Text, BookmarkField.Label);
+        }
+
+        private void txtKeywords_Leave(object sender, EventArgs e)
+        {
+            compareStringFromUI(txtKeywords.Text, BookmarkField.Keyword);
+        }
+
+        private void txtTags_Leave(object sender, EventArgs e)
+        {
+            compareStringFromUI(txtKeywords.Text, BookmarkField.Tags);
+        }
+
+        private void btnStore_Click(object sender, EventArgs e)
+        {
+            if (editedBookmark != null)
+            {
+                editedBookmark.uri = txtAddress.Text;
+                editedBookmark.keyword = txtKeywords.Text;
+                editedBookmark.label = txtLabels.Text;
+                editedBookmark.title = txtName.Text;
+                editedBookmark.tags = txtTags.Text;
+                btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+            }
+
+        }
+
+        private void btnRevert_Click(object sender, EventArgs e)
+        {
+            if (editedBookmark != null)
+            {
+                txtAddress.Text = editedBookmark.uri ?? "";
+                txtKeywords.Text = editedBookmark.keyword ?? "";
+                txtLabels.Text = editedBookmark.keyword ?? "";
+                txtName.Text = editedBookmark.title ?? "";
+                txtTags.Text = editedBookmark.tags ?? "";
+                btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+            }
+
         }
     }
 }

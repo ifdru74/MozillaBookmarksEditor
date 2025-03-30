@@ -31,6 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             statusStrip1 = new StatusStrip();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openToolStripMenuItem = new ToolStripMenuItem();
@@ -83,8 +84,12 @@
             txtKeywords = new TextBox();
             label5 = new Label();
             txtTags = new TextBox();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            btnStore = new Button();
+            btnRevert = new Button();
             openFileDialog1 = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
+            statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -96,15 +101,26 @@
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // statusStrip1
             // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
             statusStrip1.Location = new Point(0, 409);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.ImageAlign = ContentAlignment.MiddleLeft;
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(785, 17);
+            toolStripStatusLabel1.Spring = true;
+            toolStripStatusLabel1.Text = "Ready";
+            toolStripStatusLabel1.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // menuStrip1
             // 
@@ -506,15 +522,17 @@
             tableLayoutPanel1.Controls.Add(txtKeywords, 1, 3);
             tableLayoutPanel1.Controls.Add(label5, 0, 4);
             tableLayoutPanel1.Controls.Add(txtTags, 1, 4);
+            tableLayoutPanel1.Controls.Add(flowLayoutPanel1, 1, 5);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.MinimumSize = new Size(500, 120);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 5;
+            tableLayoutPanel1.RowCount = 6;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanel1.Size = new Size(530, 220);
             tableLayoutPanel1.TabIndex = 0;
@@ -522,7 +540,8 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(3, 0);
+            label1.Location = new Point(3, 3);
+            label1.Margin = new Padding(3, 3, 3, 0);
             label1.Name = "label1";
             label1.Size = new Size(42, 15);
             label1.TabIndex = 0;
@@ -535,11 +554,13 @@
             txtName.Name = "txtName";
             txtName.Size = new Size(457, 23);
             txtName.TabIndex = 1;
+            txtName.Leave += txtName_Leave;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(3, 29);
+            label2.Location = new Point(3, 32);
+            label2.Margin = new Padding(3, 3, 3, 0);
             label2.Name = "label2";
             label2.Size = new Size(52, 15);
             label2.TabIndex = 2;
@@ -552,11 +573,13 @@
             txtAddress.Name = "txtAddress";
             txtAddress.Size = new Size(457, 23);
             txtAddress.TabIndex = 3;
+            txtAddress.Leave += txtAddress_Leave;
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(3, 58);
+            label3.Location = new Point(3, 61);
+            label3.Margin = new Padding(3, 3, 3, 0);
             label3.Name = "label3";
             label3.Size = new Size(43, 15);
             label3.TabIndex = 4;
@@ -569,11 +592,13 @@
             txtLabels.Name = "txtLabels";
             txtLabels.Size = new Size(457, 23);
             txtLabels.TabIndex = 5;
+            txtLabels.Leave += txtLabels_Leave;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(3, 87);
+            label4.Location = new Point(3, 90);
+            label4.Margin = new Padding(3, 3, 3, 0);
             label4.Name = "label4";
             label4.Size = new Size(61, 15);
             label4.TabIndex = 6;
@@ -586,13 +611,15 @@
             txtKeywords.Name = "txtKeywords";
             txtKeywords.Size = new Size(457, 23);
             txtKeywords.TabIndex = 7;
+            txtKeywords.Leave += txtKeywords_Leave;
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(3, 116);
+            label5.Location = new Point(3, 119);
+            label5.Margin = new Padding(3, 3, 3, 0);
             label5.Name = "label5";
-            label5.Size = new Size(34, 15);
+            label5.Size = new Size(33, 15);
             label5.TabIndex = 8;
             label5.Text = "&Tags:";
             // 
@@ -603,6 +630,41 @@
             txtTags.Name = "txtTags";
             txtTags.Size = new Size(457, 23);
             txtTags.TabIndex = 9;
+            txtTags.Leave += txtTags_Leave;
+            // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.Controls.Add(btnStore);
+            flowLayoutPanel1.Controls.Add(btnRevert);
+            flowLayoutPanel1.Dock = DockStyle.Top;
+            flowLayoutPanel1.Location = new Point(70, 139);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(457, 37);
+            flowLayoutPanel1.TabIndex = 10;
+            // 
+            // btnStore
+            // 
+            btnStore.Enabled = false;
+            btnStore.Location = new Point(5, 5);
+            btnStore.Margin = new Padding(5, 5, 3, 3);
+            btnStore.Name = "btnStore";
+            btnStore.Size = new Size(75, 23);
+            btnStore.TabIndex = 0;
+            btnStore.Text = "&Store";
+            btnStore.UseVisualStyleBackColor = true;
+            btnStore.Click += btnStore_Click;
+            // 
+            // btnRevert
+            // 
+            btnRevert.Enabled = false;
+            btnRevert.Location = new Point(88, 5);
+            btnRevert.Margin = new Padding(5, 5, 3, 3);
+            btnRevert.Name = "btnRevert";
+            btnRevert.Size = new Size(75, 23);
+            btnRevert.TabIndex = 1;
+            btnRevert.Text = "&Revert";
+            btnRevert.UseVisualStyleBackColor = true;
+            btnRevert.Click += btnRevert_Click;
             // 
             // openFileDialog1
             // 
@@ -632,6 +694,8 @@
             Text = "Bookmarks";
             FormClosing += MainForm_FormClosing;
             Load += MainForm_Load;
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             toolStrip1.ResumeLayout(false);
@@ -646,6 +710,7 @@
             splitContainer2.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
+            flowLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -707,5 +772,9 @@
         private SaveFileDialog saveFileDialog1;
         private Label label5;
         private TextBox txtTags;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private Button btnStore;
+        private Button btnRevert;
+        private ToolStripStatusLabel toolStripStatusLabel1;
     }
 }
