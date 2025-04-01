@@ -32,6 +32,7 @@ namespace MozillaBookmarksEditor
                     bookmarksJsonFile.ReadJsonFile(openFileDialog1.FileName);
                     CreateTreeNode(bookmarksJsonFile.root);
                     Text = openFileDialog1.FileName;
+                    toolStripEditStatus.Text = "Loaded";
                 }
                 catch (Exception ex)
                 {
@@ -117,7 +118,10 @@ namespace MozillaBookmarksEditor
                 txtTags.Text = "";
             enableGoto();
             listView1.Tag = tNode.Tag;
-            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = true;
+            toolStripDelete.Enabled = 
+                deleteToolStripMenuItem.Enabled =
+                addNewToolStripMenuItem.Enabled = 
+                toolStripAdd.Enabled = true;
             if (bookmark != null && bookmark.hasChildren())
             {
                 foreach (Bookmark bm in bookmark.children)
@@ -288,6 +292,27 @@ namespace MozillaBookmarksEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if(treeView1.Focused && treeView1.SelectedNode!=null)
+            {
+                TreeNode sn = treeView1.SelectedNode;
+                Bookmark? selContainer = treeView1.SelectedNode.Tag as Bookmark;
+                if (selContainer != null)
+                {
+                    TreeNode pn = treeView1.SelectedNode.Parent;
+                    if (pn!=null)
+                    {
+                        Bookmark? parentContainer = pn.Tag as Bookmark;
+                        if (parentContainer != null)
+                        {
+                            parentContainer.children.Remove(selContainer);
+                            treeView1.SelectedNode = pn;
+                            pn.Nodes.Remove(sn);
+                            toolStripEditStatus.Text = "Altered";
+                            return;
+                        }
+                    }
+                }
+            }
             if (listView1.Tag == null || listView1.SelectedIndices.Count == 0) { return; }
             Bookmark? folder = listView1.Tag as Bookmark;
             if (folder != null)
@@ -299,6 +324,7 @@ namespace MozillaBookmarksEditor
                     {
                         listView1.Items.Remove(lvi);
                         folder.children.Remove(item);
+                        toolStripEditStatus.Text = "Altered";
                     }
                 }
             }
@@ -318,6 +344,7 @@ namespace MozillaBookmarksEditor
                 {
                     bookmarksJsonFile.WriteJsonFile(saveFileDialog1.FileName, root);
                     Text = saveFileDialog1.FileName;
+                    toolStripEditStatus.Text = "Saved";
                 }
                 catch (Exception ex)
                 {
@@ -438,6 +465,7 @@ namespace MozillaBookmarksEditor
                 editedBookmark.title = txtName.Text;
                 editedBookmark.tags = txtTags.Text;
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+                toolStripEditStatus.Text = "Edited";
             }
 
         }

@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
+            toolStripEditStatus = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openToolStripMenuItem = new ToolStripMenuItem();
@@ -106,7 +107,7 @@
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripEditStatus });
             statusStrip1.Location = new Point(0, 409);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 22);
@@ -117,10 +118,18 @@
             // 
             toolStripStatusLabel1.ImageAlign = ContentAlignment.MiddleLeft;
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(785, 17);
+            toolStripStatusLabel1.Size = new Size(754, 17);
             toolStripStatusLabel1.Spring = true;
             toolStripStatusLabel1.Text = "Ready";
             toolStripStatusLabel1.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // toolStripEditStatus
+            // 
+            toolStripEditStatus.ImageAlign = ContentAlignment.MiddleLeft;
+            toolStripEditStatus.Name = "toolStripEditStatus";
+            toolStripEditStatus.Size = new Size(0, 17);
+            toolStripEditStatus.TextAlign = ContentAlignment.MiddleLeft;
+            toolStripEditStatus.ToolTipText = "Editing status";
             // 
             // menuStrip1
             // 
@@ -619,7 +628,7 @@
             label5.Location = new Point(3, 119);
             label5.Margin = new Padding(3, 3, 3, 0);
             label5.Name = "label5";
-            label5.Size = new Size(33, 15);
+            label5.Size = new Size(34, 15);
             label5.TabIndex = 8;
             label5.Text = "&Tags:";
             // 
@@ -776,5 +785,6 @@
         private Button btnStore;
         private Button btnRevert;
         private ToolStripStatusLabel toolStripStatusLabel1;
+        private ToolStripStatusLabel toolStripEditStatus;
     }
 }
