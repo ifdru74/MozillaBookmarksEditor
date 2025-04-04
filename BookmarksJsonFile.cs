@@ -22,6 +22,13 @@ namespace MozillaBookmarksEditor
         Label,
         Tags
     }
+    public enum BookmarkType
+    {
+        None,
+        URL,
+        Separator,
+        Container
+    }
     public class Bookmark
     {
         string? Guid;
@@ -96,6 +103,22 @@ namespace MozillaBookmarksEditor
                 }
             }
             return false;
+        }
+        public BookmarkType getItemType()
+        {
+            if (typeCode == 1 || type == "text/x-moz-place")
+            {
+                return BookmarkType.URL;
+            }
+            if (typeCode == 2 || type == "text/x-moz-place-container")
+            {
+                return BookmarkType.Container;
+            }
+            if (typeCode == 3 || type == "text/x-moz-place-separator")
+            {
+                return BookmarkType.Separator;
+            }
+            return BookmarkType.None;
         }
     }
 

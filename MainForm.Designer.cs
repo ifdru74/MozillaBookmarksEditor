@@ -118,7 +118,7 @@
             // 
             toolStripStatusLabel1.ImageAlign = ContentAlignment.MiddleLeft;
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(754, 17);
+            toolStripStatusLabel1.Size = new Size(785, 17);
             toolStripStatusLabel1.Spring = true;
             toolStripStatusLabel1.Text = "Ready";
             toolStripStatusLabel1.TextAlign = ContentAlignment.MiddleLeft;
@@ -264,6 +264,7 @@
             menuItemFindDuplicated.Size = new Size(196, 22);
             menuItemFindDuplicated.Text = "&Find duplicated";
             menuItemFindDuplicated.ToolTipText = "Find duplicates among bookmarks";
+            menuItemFindDuplicated.Click += menuItemFindDuplicated_Click;
             // 
             // gotoURIToolStripMenuItem
             // 
@@ -339,6 +340,7 @@
             toolStripFind.Size = new Size(23, 22);
             toolStripFind.Text = "Find duplicates";
             toolStripFind.ToolTipText = "Find duplicates among bookmarks";
+            toolStripFind.Click += menuItemFindDuplicated_Click;
             // 
             // gotoURI
             // 
@@ -436,6 +438,7 @@
             treeView1.ImageList = smallImagesList;
             treeView1.Location = new Point(0, 0);
             treeView1.Name = "treeView1";
+            treeView1.PathSeparator = "/";
             treeView1.SelectedImageIndex = 0;
             treeView1.ShowRootLines = false;
             treeView1.Size = new Size(266, 360);

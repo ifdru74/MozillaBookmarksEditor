@@ -1,7 +1,9 @@
 using MozillaBookmarksEditor.Properties;
 using System.Diagnostics;
 using System.Reflection;
+using System.Resources;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace MozillaBookmarksEditor
@@ -118,9 +120,9 @@ namespace MozillaBookmarksEditor
                 txtTags.Text = "";
             enableGoto();
             listView1.Tag = tNode.Tag;
-            toolStripDelete.Enabled = 
+            toolStripDelete.Enabled =
                 deleteToolStripMenuItem.Enabled =
-                addNewToolStripMenuItem.Enabled = 
+                addNewToolStripMenuItem.Enabled =
                 toolStripAdd.Enabled = true;
             if (bookmark != null && bookmark.hasChildren())
             {
@@ -149,23 +151,24 @@ namespace MozillaBookmarksEditor
                 }
             }
             // fill status bar
-            StringBuilder sb = new StringBuilder();
-            sb.Append(tNode.Text);
-            sb.Insert(0, "/");
-            do
-            {
-                tNode = tNode.Parent;
-                if (tNode != null)
-                {
-                    sb.Insert(0, tNode.Text);
-                    sb.Insert(0, "/");
-                }
-                else
-                {
-                    break;
-                }
-            } while (tNode.Parent != null);
-            toolStripStatusLabel1.Text = sb.ToString();
+            toolStripStatusLabel1.Text = tNode.FullPath.Substring(3);
+            //StringBuilder sb = new StringBuilder();
+            //sb.Append(tNode.Text);
+            //sb.Insert(0, "/");
+            //do
+            //{
+            //    tNode = tNode.Parent;
+            //    if (tNode != null)
+            //    {
+            //        sb.Insert(0, tNode.Text);
+            //        sb.Insert(0, "/");
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //} while (tNode.Parent != null);
+            //toolStripStatusLabel1.Text = sb.ToString();
         }
 
         private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -279,8 +282,9 @@ namespace MozillaBookmarksEditor
             Properties.Settings.Default.Height = Height;
             Properties.Settings.Default.Width = Width;
             StringBuilder sb = new StringBuilder();
-            for (int i= 0; i<listView1.Columns.Count; i++) {
-                if (i!=0)
+            for (int i = 0; i < listView1.Columns.Count; i++)
+            {
+                if (i != 0)
                 {
                     sb.Append(",");
                 }
@@ -292,14 +296,14 @@ namespace MozillaBookmarksEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(treeView1.Focused && treeView1.SelectedNode!=null)
+            if (treeView1.Focused && treeView1.SelectedNode != null)
             {
                 TreeNode sn = treeView1.SelectedNode;
                 Bookmark? selContainer = treeView1.SelectedNode.Tag as Bookmark;
                 if (selContainer != null)
                 {
                     TreeNode pn = treeView1.SelectedNode.Parent;
-                    if (pn!=null)
+                    if (pn != null)
                     {
                         Bookmark? parentContainer = pn.Tag as Bookmark;
                         if (parentContainer != null)
@@ -409,28 +413,28 @@ namespace MozillaBookmarksEditor
                     switch (field)
                     {
                         case BookmarkField.Title:
-                            bmVal = editedBookmark.title ?? "";
+                            bmVal = editedBookmark.title ?? string.Empty;
                             break;
                         case BookmarkField.Uri:
-                            bmVal = editedBookmark.uri ?? "";
+                            bmVal = editedBookmark.uri ?? string.Empty;
                             break;
                         case BookmarkField.Guid:
-                            bmVal = editedBookmark.guid ?? "";
+                            bmVal = editedBookmark.guid ?? string.Empty;
                             break;
                         case BookmarkField.Label:
-                            bmVal = editedBookmark.label ?? "";
+                            bmVal = editedBookmark.label ?? string.Empty;
                             break;
                         case BookmarkField.IconUri:
-                            bmVal = editedBookmark.iconUri ?? "";
+                            bmVal = editedBookmark.iconUri ?? string.Empty;
                             break;
                         case BookmarkField.Keyword:
-                            bmVal = editedBookmark.keyword ?? "";
+                            bmVal = editedBookmark.keyword ?? string.Empty;
                             break;
                         case BookmarkField.Root:
-                            bmVal = editedBookmark.root ?? "";
+                            bmVal = editedBookmark.root ?? string.Empty;
                             break;
                         case BookmarkField.Type:
-                            bmVal = editedBookmark.type ?? "";
+                            bmVal = editedBookmark.type ?? string.Empty;
                             break;
                     }
                     if (uiVal != bmVal)
@@ -482,6 +486,127 @@ namespace MozillaBookmarksEditor
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
             }
 
+        }
+        void iterateContainer(SimilarLinks links, Bookmark cont, string bmPath)
+        {
+            if(cont.children==null)
+            {
+                return;
+            }
+            foreach (Bookmark bm in cont.children)
+            {
+                switch (bm.getItemType())
+                {
+                    case BookmarkType.URL:
+                        links.Add(bm, bmPath);
+                        break;
+                    case BookmarkType.Container:
+                        iterateContainer(links, bm, bmPath + "/" + bm.title);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        private void menuItemFindDuplicated_Click(object sender, EventArgs e)
+        {
+            SimilarLinks links = new SimilarLinks();
+            Bookmark? bmroot = null;
+            if (treeView1.SelectedNode != null)
+            {
+                Bookmark? bm = treeView1.SelectedNode.Tag as Bookmark;
+                if (bm != null)
+                {
+                    iterateContainer(links, bm, treeView1.SelectedNode.FullPath.Substring(3));
+                    bmroot = bm;
+                }
+            }
+            if(bmroot==null)
+            {
+                iterateContainer(links, bookmarksJsonFile.root, "");
+                bmroot = bookmarksJsonFile.root;
+            }
+            if(links.links.Count<1)
+            {
+                return;
+            }
+            links.RemoveUnique();
+            if (links.links.Count < 1)
+            {
+                return;
+            }
+            SimilarBookmarksFrm smf = new SimilarBookmarksFrm(links);
+            if (smf.ShowDialog() == DialogResult.OK)
+            {
+                int deletedCount = 0;
+                foreach (string uri in links.links.Keys)
+                {
+                    foreach (BookmarkWithPath bmwp in links.links[uri])
+                    {
+                        if (bmwp.Checked)
+                        {
+                            deleteBookmarkByTreePath(bmwp.Bookmark, bmwp.Path);
+                            deletedCount++;
+                        }
+                    }
+                }
+                if (deletedCount > 0)
+                {
+                    toolStripEditStatus.Text = "Altered";
+                }
+            }
+        }
+
+        private void deleteBookmarkByTreePath(Bookmark bookmark, string Path)
+        {
+            TreeNode? tn = gotoTreeNode(Path);
+            if (tn != null)
+            {
+                Bookmark? bm = tn.Tag as Bookmark;
+                if (bm != null)
+                {
+                    bm.children.Remove(bookmark);
+                }
+            }
+        }
+
+        private TreeNode? gotoTreeNode(string Path)
+        {
+            if(Path.Length<1)
+            {
+                return null;
+            }
+            string[] aparts = Path.Split('/');
+            if (aparts.Length < 1)
+            {
+                return null;
+            }
+            int idx = 0;
+            TreeNode? tnRet = null;
+            TreeNodeCollection nodes = treeView1.Nodes;
+            while (idx < aparts.Length)
+            {
+                bool bFound = false;
+                foreach (TreeNode tn in nodes)
+                {
+                    if (aparts[idx] == string.Empty || tn.Text == aparts[idx])
+                    {
+                        if (idx == aparts.Length-1)
+                        {
+                            tnRet = tn;
+                        }
+                        idx++;
+                        nodes = tn.Nodes;
+                        bFound = true;
+                        break;
+                    }
+                }
+                if (!bFound)
+                {
+                    break;
+                }
+            }
+            return tnRet;
         }
     }
 }
