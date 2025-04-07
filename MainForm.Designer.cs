@@ -47,6 +47,10 @@
             addNewToolStripMenuItem = new ToolStripMenuItem();
             deleteToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
+            toolStripMenuItem1 = new ToolStripMenuItem();
+            allToolStripMenuItem = new ToolStripMenuItem();
+            invertToolStripMenuItem = new ToolStripMenuItem();
+            noneToolStripMenuItem = new ToolStripMenuItem();
             viewToolStripMenuItem = new ToolStripMenuItem();
             menuItemFindDuplicated = new ToolStripMenuItem();
             gotoURIToolStripMenuItem = new ToolStripMenuItem();
@@ -185,7 +189,7 @@
             // 
             // editToolStripMenuItem
             // 
-            editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { copyToolStripMenuItem, pasteToolStripMenuItem, cutToolStripMenuItem, toolStripSeparator6, addNewToolStripMenuItem, deleteToolStripMenuItem, toolStripSeparator7 });
+            editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { copyToolStripMenuItem, pasteToolStripMenuItem, cutToolStripMenuItem, toolStripSeparator6, addNewToolStripMenuItem, deleteToolStripMenuItem, toolStripSeparator7, toolStripMenuItem1 });
             editToolStripMenuItem.Name = "editToolStripMenuItem";
             editToolStripMenuItem.Size = new Size(39, 20);
             editToolStripMenuItem.Text = "&Edit";
@@ -195,32 +199,36 @@
             copyToolStripMenuItem.Image = Properties.Resources.Copy_32x32;
             copyToolStripMenuItem.Name = "copyToolStripMenuItem";
             copyToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
-            copyToolStripMenuItem.Size = new Size(157, 22);
+            copyToolStripMenuItem.Size = new Size(180, 22);
             copyToolStripMenuItem.Text = "&Copy";
             copyToolStripMenuItem.ToolTipText = "Copy selected into clipboard";
+            copyToolStripMenuItem.Click += copyToolStripMenuItem_Click;
             // 
             // pasteToolStripMenuItem
             // 
+            pasteToolStripMenuItem.Enabled = false;
             pasteToolStripMenuItem.Image = Properties.Resources.Paste_32x32;
             pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
             pasteToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
-            pasteToolStripMenuItem.Size = new Size(157, 22);
+            pasteToolStripMenuItem.Size = new Size(180, 22);
             pasteToolStripMenuItem.Text = "&Paste";
             pasteToolStripMenuItem.ToolTipText = "Paste into current selection";
+            pasteToolStripMenuItem.Click += pasteToolStripMenuItem_Click;
             // 
             // cutToolStripMenuItem
             // 
             cutToolStripMenuItem.Image = Properties.Resources.Cut_32x32;
             cutToolStripMenuItem.Name = "cutToolStripMenuItem";
             cutToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
-            cutToolStripMenuItem.Size = new Size(157, 22);
+            cutToolStripMenuItem.Size = new Size(180, 22);
             cutToolStripMenuItem.Text = "C&ut";
             cutToolStripMenuItem.ToolTipText = "Cut seleted";
+            cutToolStripMenuItem.Click += toolStripCut_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(154, 6);
+            toolStripSeparator6.Size = new Size(177, 6);
             // 
             // addNewToolStripMenuItem
             // 
@@ -228,7 +236,7 @@
             addNewToolStripMenuItem.Image = Properties.Resources.Add_32x32;
             addNewToolStripMenuItem.Name = "addNewToolStripMenuItem";
             addNewToolStripMenuItem.ShortcutKeys = Keys.Insert;
-            addNewToolStripMenuItem.Size = new Size(157, 22);
+            addNewToolStripMenuItem.Size = new Size(180, 22);
             addNewToolStripMenuItem.Text = "&Add new";
             addNewToolStripMenuItem.ToolTipText = "Add new link to bookmarks";
             // 
@@ -238,7 +246,7 @@
             deleteToolStripMenuItem.Image = Properties.Resources.Delete_32x32;
             deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             deleteToolStripMenuItem.ShortcutKeys = Keys.Delete;
-            deleteToolStripMenuItem.Size = new Size(157, 22);
+            deleteToolStripMenuItem.Size = new Size(180, 22);
             deleteToolStripMenuItem.Text = "&Delete";
             deleteToolStripMenuItem.ToolTipText = "Delete selected";
             deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
@@ -246,7 +254,41 @@
             // toolStripSeparator7
             // 
             toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new Size(154, 6);
+            toolStripSeparator7.Size = new Size(177, 6);
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.DropDownItems.AddRange(new ToolStripItem[] { allToolStripMenuItem, invertToolStripMenuItem, noneToolStripMenuItem });
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(180, 22);
+            toolStripMenuItem1.Text = "&Select";
+            toolStripMenuItem1.ToolTipText = "Selection menu";
+            // 
+            // allToolStripMenuItem
+            // 
+            allToolStripMenuItem.Name = "allToolStripMenuItem";
+            allToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.A;
+            allToolStripMenuItem.Size = new Size(180, 22);
+            allToolStripMenuItem.Text = "&All";
+            allToolStripMenuItem.Click += allToolStripMenuItem_Click;
+            // 
+            // invertToolStripMenuItem
+            // 
+            invertToolStripMenuItem.Name = "invertToolStripMenuItem";
+            invertToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.I;
+            invertToolStripMenuItem.Size = new Size(180, 22);
+            invertToolStripMenuItem.Text = "&Invert";
+            invertToolStripMenuItem.ToolTipText = "Invert selection";
+            invertToolStripMenuItem.Click += invertToolStripMenuItem_Click;
+            // 
+            // noneToolStripMenuItem
+            // 
+            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
+            noneToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Space;
+            noneToolStripMenuItem.Size = new Size(180, 22);
+            noneToolStripMenuItem.Text = "&None";
+            noneToolStripMenuItem.ToolTipText = "Clear selection";
+            noneToolStripMenuItem.Click += noneToolStripMenuItem_Click;
             // 
             // viewToolStripMenuItem
             // 
@@ -367,15 +409,18 @@
             toolStripCopy.Name = "toolStripCopy";
             toolStripCopy.Size = new Size(23, 22);
             toolStripCopy.Text = "Copy selected";
+            toolStripCopy.Click += copyToolStripMenuItem_Click;
             // 
             // toolStripPaste
             // 
             toolStripPaste.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripPaste.Enabled = false;
             toolStripPaste.Image = Properties.Resources.Paste_32x32;
             toolStripPaste.ImageTransparentColor = Color.Magenta;
             toolStripPaste.Name = "toolStripPaste";
             toolStripPaste.Size = new Size(23, 22);
             toolStripPaste.Text = "Paste copied";
+            toolStripPaste.Click += pasteToolStripMenuItem_Click;
             // 
             // toolStripCut
             // 
@@ -385,6 +430,7 @@
             toolStripCut.Name = "toolStripCut";
             toolStripCut.Size = new Size(23, 22);
             toolStripCut.Text = "Cut selected";
+            toolStripCut.Click += toolStripCut_Click;
             // 
             // toolStripSeparator3
             // 
@@ -446,6 +492,8 @@
             treeView1.TabIndex = 0;
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
+            treeView1.Enter += treeView1_Enter;
+            treeView1.Leave += treeView1_Leave;
             // 
             // smallImagesList
             // 
@@ -493,6 +541,8 @@
             listView1.View = View.Details;
             listView1.ColumnClick += listView1_ColumnClick;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
+            listView1.Enter += listView1_Enter;
+            listView1.Leave += listView1_Leave;
             // 
             // columnHeaderName
             // 
@@ -789,5 +839,9 @@
         private Button btnRevert;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private ToolStripStatusLabel toolStripEditStatus;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem allToolStripMenuItem;
+        private ToolStripMenuItem invertToolStripMenuItem;
+        private ToolStripMenuItem noneToolStripMenuItem;
     }
 }

@@ -77,7 +77,7 @@ namespace MozillaBookmarksEditor
                 }
                 return Children;
                 }
-    set {Children = value;} 
+            set {Children = value;} 
         }
         public bool hasChildren()
         {
@@ -120,6 +120,18 @@ namespace MozillaBookmarksEditor
             }
             return BookmarkType.None;
         }
+        public void AddChild(Bookmark child)
+        {
+            if (Children != null)
+            {
+                Children.Add(child);
+            }
+            else
+            {
+                Children = [child];
+            }
+        }
+
     }
 
     internal class BookmarksJsonFile

@@ -5,6 +5,7 @@ using System.Resources;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace MozillaBookmarksEditor
 {
@@ -15,11 +16,15 @@ namespace MozillaBookmarksEditor
         private Bookmark? editedBookmark;
         private bool editedBookmarkChanged;
         private bool editedBookmarkLocked;
+        private List<Bookmark> clippedBoormarks;
+        private bool clipToMove;
+        Bookmark? clipSrc;
         public MainForm()
         {
-            editedBookmarkChanged = editedBookmarkLocked = false;
+            clipToMove = editedBookmarkChanged = editedBookmarkLocked = false;
             bookmarksJsonFile = new BookmarksJsonFile();
             lvwColumnSorter = new ListViewColumnSorter();
+            clippedBoormarks = new List<Bookmark>();
             InitializeComponent();
         }
 
@@ -101,17 +106,8 @@ namespace MozillaBookmarksEditor
                 }
             }
         }
-
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        private void updateListView(Bookmark? bookmark)
         {
-            listView1.Tag = null;
-            if (e.Node == null)
-            {
-                addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = false;
-                return;
-            }
-            TreeNode tNode = e.Node;
-            Bookmark? bookmark = tNode.Tag as Bookmark;
             listView1.Items.Clear();
             txtAddress.Text =
                 txtKeywords.Text =
@@ -119,7 +115,7 @@ namespace MozillaBookmarksEditor
                 txtName.Text =
                 txtTags.Text = "";
             enableGoto();
-            listView1.Tag = tNode.Tag;
+            listView1.Tag = bookmark;
             toolStripDelete.Enabled =
                 deleteToolStripMenuItem.Enabled =
                 addNewToolStripMenuItem.Enabled =
@@ -150,25 +146,19 @@ namespace MozillaBookmarksEditor
                     }
                 }
             }
+
+        }
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            listView1.Tag = null;
+            if (e.Node == null)
+            {
+                addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = false;
+                return;
+            }
+            updateListView(e.Node.Tag as Bookmark);
             // fill status bar
-            toolStripStatusLabel1.Text = tNode.FullPath.Substring(3);
-            //StringBuilder sb = new StringBuilder();
-            //sb.Append(tNode.Text);
-            //sb.Insert(0, "/");
-            //do
-            //{
-            //    tNode = tNode.Parent;
-            //    if (tNode != null)
-            //    {
-            //        sb.Insert(0, tNode.Text);
-            //        sb.Insert(0, "/");
-            //    }
-            //    else
-            //    {
-            //        break;
-            //    }
-            //} while (tNode.Parent != null);
-            //toolStripStatusLabel1.Text = sb.ToString();
+            toolStripStatusLabel1.Text = e.Node.FullPath.Substring(3);
         }
 
         private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -489,7 +479,7 @@ namespace MozillaBookmarksEditor
         }
         void iterateContainer(SimilarLinks links, Bookmark cont, string bmPath)
         {
-            if(cont.children==null)
+            if (cont.children == null)
             {
                 return;
             }
@@ -512,27 +502,30 @@ namespace MozillaBookmarksEditor
         {
             SimilarLinks links = new SimilarLinks();
             Bookmark? bmroot = null;
+            Bookmark? bm = null;
             if (treeView1.SelectedNode != null)
             {
-                Bookmark? bm = treeView1.SelectedNode.Tag as Bookmark;
+                bm = treeView1.SelectedNode.Tag as Bookmark;
                 if (bm != null)
                 {
                     iterateContainer(links, bm, treeView1.SelectedNode.FullPath.Substring(3));
                     bmroot = bm;
                 }
             }
-            if(bmroot==null)
+            if (bmroot == null)
             {
                 iterateContainer(links, bookmarksJsonFile.root, "");
                 bmroot = bookmarksJsonFile.root;
             }
-            if(links.links.Count<1)
+            if (links.links.Count < 1)
             {
+                MessageBox.Show("Unable to find items under selected tree node", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             links.RemoveUnique();
             if (links.links.Count < 1)
             {
+                MessageBox.Show("No duplicated items found", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             SimilarBookmarksFrm smf = new SimilarBookmarksFrm(links);
@@ -552,7 +545,12 @@ namespace MozillaBookmarksEditor
                 }
                 if (deletedCount > 0)
                 {
+                    updateListView(bm);
                     toolStripEditStatus.Text = "Altered";
+                }
+                else
+                {
+                    MessageBox.Show("No items selected for removal", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -572,7 +570,7 @@ namespace MozillaBookmarksEditor
 
         private TreeNode? gotoTreeNode(string Path)
         {
-            if(Path.Length<1)
+            if (Path.Length < 1)
             {
                 return null;
             }
@@ -591,7 +589,7 @@ namespace MozillaBookmarksEditor
                 {
                     if (aparts[idx] == string.Empty || tn.Text == aparts[idx])
                     {
-                        if (idx == aparts.Length-1)
+                        if (idx == aparts.Length - 1)
                         {
                             tnRet = tn;
                         }
@@ -607,6 +605,131 @@ namespace MozillaBookmarksEditor
                 }
             }
             return tnRet;
+        }
+        private void updateClippedBoormarks(bool bMove)
+        {
+            clipSrc = null;
+            clippedBoormarks.Clear();
+            if (listView1.SelectedItems != null && listView1.SelectedItems.Count > 0)
+            {
+                foreach (ListViewItem item in listView1.SelectedItems)
+                {
+                    Bookmark? bm = item.Tag as Bookmark;
+                    if (bm != null)
+                    {
+                        clippedBoormarks.Add(bm);
+                    }
+                }
+                clipSrc = listView1.Tag as Bookmark;
+            }
+            else
+            {
+                if (treeView1.SelectedNode != null)
+                {
+                    Bookmark? bm = treeView1.SelectedNode.Tag as Bookmark;
+                    if (bm != null)
+                    {
+                        clippedBoormarks.Add(bm);
+                        if (treeView1.SelectedNode.Parent != null)
+                        {
+                            clipSrc = treeView1.SelectedNode.Parent.Tag as Bookmark;
+                        }
+
+                    }
+                }
+            }
+            pasteToolStripMenuItem.Enabled = toolStripPaste.Enabled = (clippedBoormarks.Count > 0 && clipSrc != null);
+            clipToMove = bMove;
+        }
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            updateClippedBoormarks(false);
+        }
+
+        private void toolStripCut_Click(object sender, EventArgs e)
+        {
+            updateClippedBoormarks(true);
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeView1.SelectedNode != null && clipSrc != null)
+            {
+                Bookmark? bm = treeView1.SelectedNode.Tag as Bookmark;
+                if (bm != null && bm != clipSrc && bm.getItemType() == BookmarkType.Container)
+                {
+                    if (clippedBoormarks.Count > 0)
+                    {
+                        foreach (Bookmark cbm in clippedBoormarks)
+                        {
+                            bm.AddChild(cbm);
+                            clipSrc.children.Remove(cbm);
+                        }
+                    }
+                    updateListView(bm);
+                }
+            }
+        }
+
+        private void allToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView1.Focused)
+            {
+                foreach (ListViewItem lvi in listView1.Items)
+                {
+                    lvi.Selected = true;
+                }
+            }
+        }
+
+        private void invertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView1.Focused)
+            {
+                foreach (ListViewItem lvi in listView1.Items)
+                {
+                    lvi.Selected = !lvi.Selected;
+                }
+            }
+        }
+
+        private void noneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView1.Focused)
+            {
+                foreach (ListViewItem lvi in listView1.Items)
+                {
+                    lvi.Selected = false;
+                }
+            }
+            else
+            {
+                if (treeView1.SelectedNode != null)
+                {
+                    treeView1.SelectedNode = null;
+                }
+            }
+        }
+
+        private void treeView1_Enter(object sender, EventArgs e)
+        {
+            noneToolStripMenuItem.Enabled = true;
+            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = !noneToolStripMenuItem.Enabled;
+        }
+
+        private void treeView1_Leave(object sender, EventArgs e)
+        {
+            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = false;
+        }
+
+        private void listView1_Enter(object sender, EventArgs e)
+        {
+            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = true;
+        }
+
+        private void listView1_Leave(object sender, EventArgs e)
+        {
+            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = false;
         }
     }
 }
