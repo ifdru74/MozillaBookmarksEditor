@@ -606,6 +606,13 @@ namespace MozillaBookmarksEditor
             }
             return tnRet;
         }
+        /**
+         * Copy/Cut/Paste have nothing to do with Windows clipboard.
+         * They use internal list (clippedBoormarks) and move flag (clipToMove)
+         * to make bookmarks copy or movement.
+         * Please be noticed: if listView focused then list view selected items 
+         * will go to the list (clippedBoormarks), otherwise selected tree node does.
+         */
         private void updateClippedBoormarks(bool bMove)
         {
             clipSrc = null;
@@ -643,12 +650,12 @@ namespace MozillaBookmarksEditor
         }
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            updateClippedBoormarks(false);
+            updateClippedBoormarks(false); // ask for a copy
         }
 
         private void toolStripCut_Click(object sender, EventArgs e)
         {
-            updateClippedBoormarks(true);
+            updateClippedBoormarks(true); // ask for a move
         }
 
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -663,7 +670,10 @@ namespace MozillaBookmarksEditor
                         foreach (Bookmark cbm in clippedBoormarks)
                         {
                             bm.AddChild(cbm);
-                            clipSrc.children.Remove(cbm);
+                            if (clipToMove)
+                            {
+                                clipSrc.children.Remove(cbm);
+                            }
                         }
                     }
                     updateListView(bm);
