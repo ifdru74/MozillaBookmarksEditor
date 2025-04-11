@@ -1,4 +1,5 @@
 using MozillaBookmarksEditor.Properties;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Reflection;
 using System.Resources;
@@ -725,10 +726,12 @@ namespace MozillaBookmarksEditor
         {
             noneToolStripMenuItem.Enabled = true;
             invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = !noneToolStripMenuItem.Enabled;
+            renameToolStripMenuItem.Enabled = toolStripRename.Enabled = true;
         }
 
         private void treeView1_Leave(object sender, EventArgs e)
         {
+            renameToolStripMenuItem.Enabled = toolStripRename.Enabled = false;
             invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = false;
         }
 
@@ -740,6 +743,83 @@ namespace MozillaBookmarksEditor
         private void listView1_Leave(object sender, EventArgs e)
         {
             invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = false;
+        }
+
+        private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeView1.SelectedNode != null)
+            {
+                if (!treeView1.SelectedNode.IsEditing)
+                {
+                    treeView1.SelectedNode.BeginEdit();
+                }
+            }
+        }
+
+        private void treeView1_BeforeLabelEdit(object sender, NodeLabelEditEventArgs e)
+        {
+            bool bCancel = true;
+            if (e.Node != null)
+            {
+                Bookmark? bm = e.Node.Tag as Bookmark;
+                if (bm != null)
+                {
+                    bCancel = false;
+                }
+            }
+            e.CancelEdit = bCancel;
+        }
+
+        private void treeView1_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+        {
+            if (e.Node != null)
+            {
+                Bookmark? bm = e.Node.Tag as Bookmark;
+                if (bm != null)
+                {
+                    bm.title = e.Label ?? e.Node.Text;
+                }
+            }
+        }
+
+        private void addNewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Bookmark? bm = null;
+            if (treeView1.SelectedNode != null)
+            {
+                Bookmark? bc = treeView1.SelectedNode.Tag as Bookmark;
+                if (listView1.Focused)
+                {
+                    bm = Bookmark.MakeBookmark(Bookmark._TypeCodeURL);
+                }
+                else
+                {
+                    bm = Bookmark.MakeBookmark(Bookmark._TypeCodeContainer);
+                }
+                bm.id = bookmarksJsonFile.root.getMaxId() + 1;
+                if (bc != null)
+                {
+                    bm.index = bc.getMaxIndex();
+                    bc.AddChild(bm);
+                }
+            }
+            if (treeView1.Focused)
+            {
+                if(treeView1.SelectedNode!=null && bm!=null)
+                {
+                    TreeNode tn = treeView1.SelectedNode.Nodes.Add("?");
+                    tn.Tag = bm;
+                }
+                return;
+            }
+            if(listView1.Focused && bm != null)
+            {
+                ListViewItem lvi = listView1.Items.Add("?");
+                lvi.Tag = bm;
+                listView1.EnsureVisible(lvi.Index);
+                listView1.SelectedItems.Clear();
+                lvi.Selected = true;
+            }
         }
     }
 }

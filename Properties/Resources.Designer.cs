@@ -143,6 +143,16 @@ namespace MozillaBookmarksEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Rename_32x32 {
+            get {
+                object obj = ResourceManager.GetObject("Rename_32x32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Save_32x32 {
             get {
                 object obj = ResourceManager.GetObject("Save_32x32", resourceCulture);
