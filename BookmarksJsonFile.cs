@@ -77,7 +77,7 @@ namespace MozillaBookmarksEditor
         public string? root { get => Root; set => Root = value; }
         public string? tags { get => Tags; set => Tags = value; }
         public string? postData { get => PostData; set => PostData = value; }
-        public List<Bookmark> children
+        public List<Bookmark>? children
         {
             get
             {
@@ -87,7 +87,15 @@ namespace MozillaBookmarksEditor
                 }
                 return Children;
             }
-            set { Children = value; }
+            set { if (value != null)
+                {
+                    Children = value;
+                }
+                else
+                {
+                    Children = [];
+                }
+            }
         }
         public bool hasChildren()
         {
@@ -142,13 +150,20 @@ namespace MozillaBookmarksEditor
             }
         }
 
+        public void Remove(Bookmark child)
+        {
+            if (Children != null)
+            {
+                Children.Remove(child);
+            }
+        }
 
         public static Bookmark MakeBookmark(int iType)
         {
             Bookmark bm = new Bookmark();
             bm.lastModified = bm.dateAdded = DateTime.Now.Ticks;
             bm.title = "?";
-            bm.guid = Guid.NewGuid().ToString();
+            bm.guid = GuidGenerator.GenerateCustomGuid2();
             bm.id = 0;
             bm.index = 0;
             switch (iType)

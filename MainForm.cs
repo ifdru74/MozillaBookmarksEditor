@@ -50,9 +50,21 @@ namespace MozillaBookmarksEditor
             menuItemFindDuplicated.Enabled = toolStripFind.Enabled = saveAsToolStripMenuItem.Enabled = toolStripSave.Enabled = bookmarksJsonFile.root != null;
         }
 
+        private void unselectTreeNode()
+        {
+            // clean up edit panel
+            txtAddress.Text = txtKeywords.Text = txtLabels.Text =
+            txtName.Text = txtTags.Text = string.Empty;
+            btnRevert.Enabled = btnStore.Enabled = false;
+            // clean up list view
+            listView1.Items.Clear();
+        }
         private void CreateTreeNode(Bookmark root)
         {
+            unselectTreeNode();
+            // clean up tree view
             treeView1.Nodes.Clear();
+            // start with a new tree top
             TreeNode node = new TreeNode("Top");
             node.Tag = root;
             node.ImageIndex = 2;
@@ -121,7 +133,7 @@ namespace MozillaBookmarksEditor
                 deleteToolStripMenuItem.Enabled =
                 addNewToolStripMenuItem.Enabled =
                 toolStripAdd.Enabled = true;
-            if (bookmark != null && bookmark.hasChildren())
+            if (bookmark != null && bookmark.hasChildren() && bookmark.children != null)
             {
                 foreach (Bookmark bm in bookmark.children)
                 {
@@ -174,18 +186,18 @@ namespace MozillaBookmarksEditor
                     txtKeywords.Text =
                     txtLabels.Text =
                     txtName.Text =
-                    txtTags.Text = "";
+                    txtTags.Text = string.Empty;
             }
             else
             {
                 editedBookmark = e.Item.Tag as Bookmark;
                 if (editedBookmark != null)
                 {
-                    txtAddress.Text = editedBookmark.uri ?? "";
-                    txtKeywords.Text = editedBookmark.keyword ?? "";
-                    txtLabels.Text = editedBookmark.label ?? "";
-                    txtName.Text = editedBookmark.title ?? "";
-                    txtTags.Text = editedBookmark.tags ?? "";
+                    txtAddress.Text = editedBookmark.uri ?? string.Empty;
+                    txtKeywords.Text = editedBookmark.keyword ?? string.Empty;
+                    txtLabels.Text = editedBookmark.label ?? string.Empty;
+                    txtName.Text = editedBookmark.title ?? string.Empty;
+                    txtTags.Text = editedBookmark.tags ?? string.Empty;
                 }
             }
             enableGoto();
@@ -297,7 +309,7 @@ namespace MozillaBookmarksEditor
                     if (pn != null)
                     {
                         Bookmark? parentContainer = pn.Tag as Bookmark;
-                        if (parentContainer != null)
+                        if (parentContainer != null && parentContainer.children != null)
                         {
                             parentContainer.children.Remove(selContainer);
                             treeView1.SelectedNode = pn;
@@ -318,7 +330,7 @@ namespace MozillaBookmarksEditor
                     if (item != null)
                     {
                         listView1.Items.Remove(lvi);
-                        folder.children.Remove(item);
+                        folder.Remove(item);
                         toolStripEditStatus.Text = "Altered";
                     }
                 }
@@ -461,6 +473,17 @@ namespace MozillaBookmarksEditor
                 editedBookmark.tags = txtTags.Text;
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
                 toolStripEditStatus.Text = "Edited";
+                if (listView1.SelectedItems.Count > 0)
+                {
+                    Bookmark? bm = listView1.SelectedItems[0].Tag as Bookmark;
+                    if (bm != null && bm == editedBookmark)
+                    {
+                        listView1.SelectedItems[0].Text = editedBookmark.title ?? string.Empty;
+                        listView1.SelectedItems[0].SubItems[1].Text = editedBookmark.keyword ?? string.Empty;
+                        listView1.SelectedItems[0].SubItems[2].Text = editedBookmark.uri ?? string.Empty;
+
+                    }
+                }
             }
 
         }
@@ -564,7 +587,7 @@ namespace MozillaBookmarksEditor
                 Bookmark? bm = tn.Tag as Bookmark;
                 if (bm != null)
                 {
-                    bm.children.Remove(bookmark);
+                    bm.Remove(bookmark);
                 }
             }
         }
@@ -673,7 +696,7 @@ namespace MozillaBookmarksEditor
                             bm.AddChild(cbm);
                             if (clipToMove)
                             {
-                                clipSrc.children.Remove(cbm);
+                                clipSrc.Remove(cbm);
                             }
                         }
                     }
@@ -718,6 +741,7 @@ namespace MozillaBookmarksEditor
                 if (treeView1.SelectedNode != null)
                 {
                     treeView1.SelectedNode = null;
+                    unselectTreeNode();
                 }
             }
         }
@@ -726,23 +750,29 @@ namespace MozillaBookmarksEditor
         {
             noneToolStripMenuItem.Enabled = true;
             invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = !noneToolStripMenuItem.Enabled;
-            renameToolStripMenuItem.Enabled = toolStripRename.Enabled = true;
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = renameToolStripMenuItem.Enabled = toolStripRename.Enabled = true;
         }
 
         private void treeView1_Leave(object sender, EventArgs e)
         {
-            renameToolStripMenuItem.Enabled = toolStripRename.Enabled = false;
-            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = false;
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
+                renameToolStripMenuItem.Enabled = toolStripRename.Enabled =
+                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = 
+                noneToolStripMenuItem.Enabled = false;
         }
 
         private void listView1_Enter(object sender, EventArgs e)
         {
-            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = true;
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
+                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = 
+                noneToolStripMenuItem.Enabled = true;
         }
 
         private void listView1_Leave(object sender, EventArgs e)
         {
-            invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = noneToolStripMenuItem.Enabled = false;
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
+                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = 
+                noneToolStripMenuItem.Enabled = false;
         }
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -799,27 +829,38 @@ namespace MozillaBookmarksEditor
                 bm.id = bookmarksJsonFile.root.getMaxId() + 1;
                 if (bc != null)
                 {
-                    bm.index = bc.getMaxIndex();
+                    bm.index = bc.getMaxIndex() + 1;
                     bc.AddChild(bm);
                 }
             }
             if (treeView1.Focused)
             {
-                if(treeView1.SelectedNode!=null && bm!=null)
+                if (treeView1.SelectedNode != null && bm != null)
                 {
                     TreeNode tn = treeView1.SelectedNode.Nodes.Add("?");
                     tn.Tag = bm;
                 }
                 return;
             }
-            if(listView1.Focused && bm != null)
+            if (listView1.Focused && bm != null)
             {
                 ListViewItem lvi = listView1.Items.Add("?");
+                lvi.SubItems.Add(string.Empty);
+                lvi.SubItems.Add(string.Empty);
                 lvi.Tag = bm;
                 listView1.EnsureVisible(lvi.Index);
                 listView1.SelectedItems.Clear();
                 lvi.Selected = true;
             }
+        }
+
+        private void txtName_Enter(object sender, EventArgs e)
+        {
+            toolStripCopy.Enabled = copyToolStripMenuItem.Enabled =
+            toolStripPaste.Enabled = pasteToolStripMenuItem.Enabled = 
+            toolStripCut.Enabled = cutToolStripMenuItem.Enabled = 
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
+            deleteToolStripMenuItem.Enabled= toolStripDelete.Enabled = false;
         }
     }
 }

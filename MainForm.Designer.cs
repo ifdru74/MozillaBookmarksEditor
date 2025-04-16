@@ -201,7 +201,7 @@
             copyToolStripMenuItem.Image = Properties.Resources.Copy_32x32;
             copyToolStripMenuItem.Name = "copyToolStripMenuItem";
             copyToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
-            copyToolStripMenuItem.Size = new Size(180, 22);
+            copyToolStripMenuItem.Size = new Size(157, 22);
             copyToolStripMenuItem.Text = "&Copy";
             copyToolStripMenuItem.ToolTipText = "Copy selected into clipboard";
             copyToolStripMenuItem.Click += copyToolStripMenuItem_Click;
@@ -212,7 +212,7 @@
             pasteToolStripMenuItem.Image = Properties.Resources.Paste_32x32;
             pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
             pasteToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
-            pasteToolStripMenuItem.Size = new Size(180, 22);
+            pasteToolStripMenuItem.Size = new Size(157, 22);
             pasteToolStripMenuItem.Text = "&Paste";
             pasteToolStripMenuItem.ToolTipText = "Paste into current selection";
             pasteToolStripMenuItem.Click += pasteToolStripMenuItem_Click;
@@ -222,7 +222,7 @@
             cutToolStripMenuItem.Image = Properties.Resources.Cut_32x32;
             cutToolStripMenuItem.Name = "cutToolStripMenuItem";
             cutToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
-            cutToolStripMenuItem.Size = new Size(180, 22);
+            cutToolStripMenuItem.Size = new Size(157, 22);
             cutToolStripMenuItem.Text = "C&ut";
             cutToolStripMenuItem.ToolTipText = "Cut seleted";
             cutToolStripMenuItem.Click += toolStripCut_Click;
@@ -230,7 +230,7 @@
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(177, 6);
+            toolStripSeparator6.Size = new Size(154, 6);
             // 
             // addNewToolStripMenuItem
             // 
@@ -238,7 +238,7 @@
             addNewToolStripMenuItem.Image = Properties.Resources.Add_32x32;
             addNewToolStripMenuItem.Name = "addNewToolStripMenuItem";
             addNewToolStripMenuItem.ShortcutKeys = Keys.Insert;
-            addNewToolStripMenuItem.Size = new Size(180, 22);
+            addNewToolStripMenuItem.Size = new Size(157, 22);
             addNewToolStripMenuItem.Text = "&Add new";
             addNewToolStripMenuItem.ToolTipText = "Add new link to bookmarks";
             addNewToolStripMenuItem.Click += addNewToolStripMenuItem_Click;
@@ -249,7 +249,7 @@
             deleteToolStripMenuItem.Image = Properties.Resources.Delete_32x32;
             deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             deleteToolStripMenuItem.ShortcutKeys = Keys.Delete;
-            deleteToolStripMenuItem.Size = new Size(180, 22);
+            deleteToolStripMenuItem.Size = new Size(157, 22);
             deleteToolStripMenuItem.Text = "&Delete";
             deleteToolStripMenuItem.ToolTipText = "Delete selected";
             deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
@@ -260,7 +260,7 @@
             renameToolStripMenuItem.Image = Properties.Resources.Rename_32x32;
             renameToolStripMenuItem.Name = "renameToolStripMenuItem";
             renameToolStripMenuItem.ShortcutKeys = Keys.F2;
-            renameToolStripMenuItem.Size = new Size(180, 22);
+            renameToolStripMenuItem.Size = new Size(157, 22);
             renameToolStripMenuItem.Text = "&Rename";
             renameToolStripMenuItem.ToolTipText = "Rename selected item";
             renameToolStripMenuItem.Click += renameToolStripMenuItem_Click;
@@ -268,13 +268,13 @@
             // toolStripSeparator7
             // 
             toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new Size(177, 6);
+            toolStripSeparator7.Size = new Size(154, 6);
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.DropDownItems.AddRange(new ToolStripItem[] { allToolStripMenuItem, invertToolStripMenuItem, noneToolStripMenuItem });
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(180, 22);
+            toolStripMenuItem1.Size = new Size(157, 22);
             toolStripMenuItem1.Text = "&Select";
             toolStripMenuItem1.ToolTipText = "Selection menu";
             // 
@@ -480,7 +480,8 @@
             toolStripRename.ImageTransparentColor = Color.Magenta;
             toolStripRename.Name = "toolStripRename";
             toolStripRename.Size = new Size(23, 22);
-            toolStripRename.Text = "toolStripButton1";
+            toolStripRename.Text = "Rename";
+            toolStripRename.ToolTipText = "Rename selected item";
             toolStripRename.Click += renameToolStripMenuItem_Click;
             // 
             // splitContainer1
@@ -644,6 +645,7 @@
             txtName.Name = "txtName";
             txtName.Size = new Size(457, 23);
             txtName.TabIndex = 1;
+            txtName.Enter += txtName_Enter;
             txtName.Leave += txtName_Leave;
             // 
             // label2
@@ -663,6 +665,7 @@
             txtAddress.Name = "txtAddress";
             txtAddress.Size = new Size(457, 23);
             txtAddress.TabIndex = 3;
+            txtAddress.Enter += txtName_Enter;
             txtAddress.Leave += txtAddress_Leave;
             // 
             // label3
@@ -682,6 +685,7 @@
             txtLabels.Name = "txtLabels";
             txtLabels.Size = new Size(457, 23);
             txtLabels.TabIndex = 5;
+            txtLabels.Enter += txtName_Enter;
             txtLabels.Leave += txtLabels_Leave;
             // 
             // label4
@@ -701,6 +705,7 @@
             txtKeywords.Name = "txtKeywords";
             txtKeywords.Size = new Size(457, 23);
             txtKeywords.TabIndex = 7;
+            txtKeywords.Enter += txtName_Enter;
             txtKeywords.Leave += txtKeywords_Leave;
             // 
             // label5
@@ -720,6 +725,7 @@
             txtTags.Name = "txtTags";
             txtTags.Size = new Size(457, 23);
             txtTags.TabIndex = 9;
+            txtTags.Enter += txtName_Enter;
             txtTags.Leave += txtTags_Leave;
             // 
             // flowLayoutPanel1
