@@ -20,9 +20,10 @@ namespace MozillaBookmarksEditor
         private List<Bookmark> clippedBoormarks;
         private bool clipToMove;
         Bookmark? clipSrc;
+        bool needToSave;
         public MainForm()
         {
-            clipToMove = editedBookmarkChanged = editedBookmarkLocked = false;
+            needToSave = clipToMove = editedBookmarkChanged = editedBookmarkLocked = false;
             bookmarksJsonFile = new BookmarksJsonFile();
             lvwColumnSorter = new ListViewColumnSorter();
             clippedBoormarks = new List<Bookmark>();
@@ -41,6 +42,7 @@ namespace MozillaBookmarksEditor
                     CreateTreeNode(bookmarksJsonFile.root);
                     Text = openFileDialog1.FileName;
                     toolStripEditStatus.Text = "Loaded";
+                    needToSave = false;
                 }
                 catch (Exception ex)
                 {
@@ -98,6 +100,13 @@ namespace MozillaBookmarksEditor
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (needToSave)
+            {
+                if (MessageBox.Show("Discard changes and exit?", "Bookmarks changed", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
             Close();
         }
 
@@ -315,6 +324,7 @@ namespace MozillaBookmarksEditor
                             treeView1.SelectedNode = pn;
                             pn.Nodes.Remove(sn);
                             toolStripEditStatus.Text = "Altered";
+                            needToSave = true;
                             return;
                         }
                     }
@@ -332,6 +342,7 @@ namespace MozillaBookmarksEditor
                         listView1.Items.Remove(lvi);
                         folder.Remove(item);
                         toolStripEditStatus.Text = "Altered";
+                        needToSave = true;
                     }
                 }
             }
@@ -352,6 +363,7 @@ namespace MozillaBookmarksEditor
                     bookmarksJsonFile.WriteJsonFile(saveFileDialog1.FileName, root);
                     Text = saveFileDialog1.FileName;
                     toolStripEditStatus.Text = "Saved";
+                    needToSave = false;
                 }
                 catch (Exception ex)
                 {
@@ -445,6 +457,13 @@ namespace MozillaBookmarksEditor
                         btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = true;
                     }
                 }
+                else
+                {
+                    if (bookmarksJsonFile.root != null && bookmarksJsonFile.root.hasChildren())
+                    {
+                        btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = uiVal != string.Empty;
+                    }
+                }
             }
         }
         private void txtLabels_Leave(object sender, EventArgs e)
@@ -464,6 +483,25 @@ namespace MozillaBookmarksEditor
 
         private void btnStore_Click(object sender, EventArgs e)
         {
+            bool bNew = false;
+            if (editedBookmark == null)
+            {
+                Bookmark? bm = null;
+                if (treeView1.SelectedNode != null)
+                {
+                    bm = treeView1.SelectedNode.Tag as Bookmark;
+                    if (bm == null)
+                    {
+                        bm = listView1.Tag as Bookmark;
+                    }
+                }
+                if(bm!=null && bm.getItemType()==BookmarkType.Container)
+                {
+                    editedBookmark = Bookmark.MakeBookmark(Bookmark._TypeCodeURL);
+                    bm.AddChild(editedBookmark);
+                    bNew = true;
+                }
+            }
             if (editedBookmark != null)
             {
                 editedBookmark.uri = txtAddress.Text;
@@ -473,33 +511,60 @@ namespace MozillaBookmarksEditor
                 editedBookmark.tags = txtTags.Text;
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
                 toolStripEditStatus.Text = "Edited";
-                if (listView1.SelectedItems.Count > 0)
+                needToSave = true;
+                if (bNew)
                 {
-                    Bookmark? bm = listView1.SelectedItems[0].Tag as Bookmark;
-                    if (bm != null && bm == editedBookmark)
+                    ListViewItem lvi = listView1.Items.Add(editedBookmark.title ?? string.Empty);
+                    lvi.SubItems.Add(editedBookmark.keyword ?? string.Empty);
+                    lvi.SubItems.Add(editedBookmark.uri ?? string.Empty);
+                    lvi.Tag = editedBookmark;
+                    lvi.ImageIndex = 1;
+                    lvi.Selected = true;
+                }
+                else
+                {
+                    if (listView1.SelectedItems.Count > 0)
                     {
-                        listView1.SelectedItems[0].Text = editedBookmark.title ?? string.Empty;
-                        listView1.SelectedItems[0].SubItems[1].Text = editedBookmark.keyword ?? string.Empty;
-                        listView1.SelectedItems[0].SubItems[2].Text = editedBookmark.uri ?? string.Empty;
-
+                        Bookmark? bm = listView1.SelectedItems[0].Tag as Bookmark;
+                        if (bm != null && bm == editedBookmark)
+                        {
+                            listView1.SelectedItems[0].Text = editedBookmark.title ?? string.Empty;
+                            listView1.SelectedItems[0].SubItems[1].Text = editedBookmark.keyword ?? string.Empty;
+                            listView1.SelectedItems[0].SubItems[2].Text = editedBookmark.uri ?? string.Empty;
+                        }
                     }
                 }
             }
-
+            else
+            {
+                txtAddress.Text =
+                txtKeywords.Text =
+                txtLabels.Text =
+                txtName.Text =
+                txtTags.Text = string.Empty;
+                btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+            }
         }
 
         private void btnRevert_Click(object sender, EventArgs e)
         {
             if (editedBookmark != null)
             {
-                txtAddress.Text = editedBookmark.uri ?? "";
-                txtKeywords.Text = editedBookmark.keyword ?? "";
-                txtLabels.Text = editedBookmark.keyword ?? "";
-                txtName.Text = editedBookmark.title ?? "";
-                txtTags.Text = editedBookmark.tags ?? "";
-                btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+                txtAddress.Text = editedBookmark.uri ?? string.Empty;
+                txtKeywords.Text = editedBookmark.keyword ?? string.Empty;
+                txtLabels.Text = editedBookmark.keyword ?? string.Empty;
+                txtName.Text = editedBookmark.title ?? string.Empty;
+                txtTags.Text = editedBookmark.tags ?? string.Empty;
             }
-
+            else
+            {
+                txtAddress.Text =
+                txtKeywords.Text =
+                txtLabels.Text =
+                txtName.Text = 
+                txtTags.Text = string.Empty;
+            }
+            btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
         }
         void iterateContainer(SimilarLinks links, Bookmark cont, string bmPath)
         {
@@ -571,6 +636,7 @@ namespace MozillaBookmarksEditor
                 {
                     updateListView(bm);
                     toolStripEditStatus.Text = "Altered";
+                    needToSave = true;
                 }
                 else
                 {
@@ -851,6 +917,7 @@ namespace MozillaBookmarksEditor
                 listView1.EnsureVisible(lvi.Index);
                 listView1.SelectedItems.Clear();
                 lvi.Selected = true;
+                lvi.ImageIndex = 1;
             }
         }
 

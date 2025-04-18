@@ -55,6 +55,9 @@
             viewToolStripMenuItem = new ToolStripMenuItem();
             menuItemFindDuplicated = new ToolStripMenuItem();
             gotoURIToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator8 = new ToolStripSeparator();
+            selectTreeToolStripMenuItem = new ToolStripMenuItem();
+            selectListToolStripMenuItem = new ToolStripMenuItem();
             toolStrip1 = new ToolStrip();
             toolStripExit = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
@@ -306,7 +309,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { menuItemFindDuplicated, gotoURIToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { menuItemFindDuplicated, gotoURIToolStripMenuItem, toolStripSeparator8, selectTreeToolStripMenuItem, selectListToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "&View";
@@ -333,6 +336,27 @@
             gotoURIToolStripMenuItem.ToolTipText = "Goto selected URI";
             gotoURIToolStripMenuItem.Click += gotoURIToolStripMenuItem_Click;
             // 
+            // toolStripSeparator8
+            // 
+            toolStripSeparator8.Name = "toolStripSeparator8";
+            toolStripSeparator8.Size = new Size(193, 6);
+            // 
+            // selectTreeToolStripMenuItem
+            // 
+            selectTreeToolStripMenuItem.Name = "selectTreeToolStripMenuItem";
+            selectTreeToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.T;
+            selectTreeToolStripMenuItem.Size = new Size(196, 22);
+            selectTreeToolStripMenuItem.Text = "Select &tree";
+            selectTreeToolStripMenuItem.ToolTipText = "Focus tree view";
+            // 
+            // selectListToolStripMenuItem
+            // 
+            selectListToolStripMenuItem.Name = "selectListToolStripMenuItem";
+            selectListToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.L;
+            selectListToolStripMenuItem.Size = new Size(196, 22);
+            selectListToolStripMenuItem.Text = "Select &list";
+            selectListToolStripMenuItem.ToolTipText = "Focus on list view";
+            // 
             // toolStrip1
             // 
             toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripExit, toolStripSeparator1, toolStripOpen, toolStripSave, toolStripSeparator2, toolStripFind, gotoURI, toolStripSeparator4, toolStripCopy, toolStripPaste, toolStripCut, toolStripSeparator3, toolStripAdd, toolStripDelete, toolStripRename });
@@ -350,7 +374,7 @@
             toolStripExit.Name = "toolStripExit";
             toolStripExit.Size = new Size(23, 22);
             toolStripExit.Text = "Exit";
-            toolStripExit.ToolTipText = "Exit application";
+            toolStripExit.ToolTipText = "Exit application (Ctrl+Q)";
             toolStripExit.Click += exitToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
@@ -366,7 +390,7 @@
             toolStripOpen.Name = "toolStripOpen";
             toolStripOpen.Size = new Size(23, 22);
             toolStripOpen.Text = "Open...";
-            toolStripOpen.ToolTipText = "Open bookmarks file";
+            toolStripOpen.ToolTipText = "Open bookmarks file (Ctrl+O)";
             toolStripOpen.Click += openToolStripMenuItem_Click;
             // 
             // toolStripSave
@@ -378,7 +402,7 @@
             toolStripSave.Name = "toolStripSave";
             toolStripSave.Size = new Size(23, 22);
             toolStripSave.Text = "Save";
-            toolStripSave.ToolTipText = "Save bookmarks file";
+            toolStripSave.ToolTipText = "Save bookmarks file (Ctrl+S)";
             toolStripSave.Click += saveAsToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
@@ -395,7 +419,7 @@
             toolStripFind.Name = "toolStripFind";
             toolStripFind.Size = new Size(23, 22);
             toolStripFind.Text = "Find duplicates";
-            toolStripFind.ToolTipText = "Find duplicates among bookmarks";
+            toolStripFind.ToolTipText = "Find duplicates among bookmarks (Ctrl+F)";
             toolStripFind.Click += menuItemFindDuplicated_Click;
             // 
             // gotoURI
@@ -407,7 +431,7 @@
             gotoURI.Name = "gotoURI";
             gotoURI.Size = new Size(23, 22);
             gotoURI.Text = "Go to selected URI";
-            gotoURI.ToolTipText = "Go to selected URI";
+            gotoURI.ToolTipText = "Go to selected URI (Ctrl+G)";
             gotoURI.Click += gotoURIToolStripMenuItem_Click;
             // 
             // toolStripSeparator4
@@ -460,6 +484,8 @@
             toolStripAdd.Name = "toolStripAdd";
             toolStripAdd.Size = new Size(23, 22);
             toolStripAdd.Text = "Add new bookmark";
+            toolStripAdd.ToolTipText = "Add new bookmark (Insert)";
+            toolStripAdd.Click += addNewToolStripMenuItem_Click;
             // 
             // toolStripDelete
             // 
@@ -470,6 +496,7 @@
             toolStripDelete.Name = "toolStripDelete";
             toolStripDelete.Size = new Size(23, 22);
             toolStripDelete.Text = "Delete selected";
+            toolStripDelete.ToolTipText = "Delete selected (Delete)";
             toolStripDelete.Click += deleteToolStripMenuItem_Click;
             // 
             // toolStripRename
@@ -879,5 +906,8 @@
         private ToolStripMenuItem noneToolStripMenuItem;
         private ToolStripMenuItem renameToolStripMenuItem;
         private ToolStripButton toolStripRename;
+        private ToolStripSeparator toolStripSeparator8;
+        private ToolStripMenuItem selectTreeToolStripMenuItem;
+        private ToolStripMenuItem selectListToolStripMenuItem;
     }
 }
