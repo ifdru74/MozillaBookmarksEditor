@@ -1,4 +1,5 @@
 using MozillaBookmarksEditor.Properties;
+using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Reflection;
@@ -41,7 +42,7 @@ namespace MozillaBookmarksEditor
                     bookmarksJsonFile.ReadJsonFile(openFileDialog1.FileName);
                     CreateTreeNode(bookmarksJsonFile.root);
                     Text = openFileDialog1.FileName;
-                    toolStripEditStatus.Text = "Loaded";
+                    toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringLoaded") ?? "Loaded!";
                     needToSave = false;
                 }
                 catch (Exception ex)
@@ -67,7 +68,7 @@ namespace MozillaBookmarksEditor
             // clean up tree view
             treeView1.Nodes.Clear();
             // start with a new tree top
-            TreeNode node = new TreeNode("Top");
+            TreeNode node = new TreeNode(Properties.Resources.ResourceManager.GetString("StringTop") ?? "Top!");
             node.Tag = root;
             node.ImageIndex = 2;
             node.SelectedImageIndex = 2;
@@ -81,7 +82,7 @@ namespace MozillaBookmarksEditor
             if (root.children == null) return -2;
             foreach (Bookmark child in root.children)
             {
-                if (child.typeCode == 2 && (child.type ?? "") == "text/x-moz-place-container")
+                if (child.getItemType()==BookmarkType.Container)
                 {
                     TreeNode childNode = new TreeNode(child.title);
                     childNode.Tag = child;
@@ -102,7 +103,9 @@ namespace MozillaBookmarksEditor
         {
             if (needToSave)
             {
-                if (MessageBox.Show("Discard changes and exit?", "Bookmarks changed", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                if (MessageBox.Show(
+                    Properties.Resources.ResourceManager.GetString("StringDiscardQ") ?? "Discard changes and exit?",
+                    Properties.Resources.ResourceManager.GetString("StringDiscardC") ?? "Bookmarks changed", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 {
                     return;
                 }
@@ -119,7 +122,7 @@ namespace MozillaBookmarksEditor
             {
                 TreeNode fNode = tNode.Nodes[0];
                 if (fNode == null) return;
-                if (fNode.Tag == null && fNode.Text == "")
+                if (fNode.Tag == null && fNode.Text == string.Empty)
                 {
                     if (AddChildren(tNode, bookmark) != -2)
                     {
@@ -135,7 +138,7 @@ namespace MozillaBookmarksEditor
                 txtKeywords.Text =
                 txtLabels.Text =
                 txtName.Text =
-                txtTags.Text = "";
+                txtTags.Text = string.Empty;
             enableGoto();
             listView1.Tag = bookmark;
             toolStripDelete.Enabled =
@@ -147,18 +150,18 @@ namespace MozillaBookmarksEditor
                 foreach (Bookmark bm in bookmark.children)
                 {
                     if (bm == null) continue;
-                    if (bm.typeCode == 1 || bm.type == "text/x-moz-place")
+                    if (bm.getItemType() == BookmarkType.URL)
                     {
                         ListViewItem lvi = new ListViewItem();
                         lvi.Tag = bm;
-                        lvi.Text = bm.title ?? "";
-                        lvi.SubItems.Add(bm.keyword ?? "");
-                        lvi.SubItems.Add(bm.uri ?? "");
+                        lvi.Text = bm.title ?? string.Empty;
+                        lvi.SubItems.Add(bm.keyword ?? string.Empty);
+                        lvi.SubItems.Add(bm.uri ?? string.Empty);
                         lvi.ImageIndex = 1;
                         listView1.Items.Add(lvi);
                         continue;
                     }
-                    if (bm.typeCode == 3 || bm.type == "text/x-moz-place-separator")
+                    if (bm.getItemType()==BookmarkType.Separator)
                     {
                         ListViewItem lvi = new ListViewItem();
                         lvi.Tag = bm;
@@ -323,7 +326,7 @@ namespace MozillaBookmarksEditor
                             parentContainer.children.Remove(selContainer);
                             treeView1.SelectedNode = pn;
                             pn.Nodes.Remove(sn);
-                            toolStripEditStatus.Text = "Altered";
+                            toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringAltered") ?? "Altered!";
                             needToSave = true;
                             return;
                         }
@@ -341,7 +344,7 @@ namespace MozillaBookmarksEditor
                     {
                         listView1.Items.Remove(lvi);
                         folder.Remove(item);
-                        toolStripEditStatus.Text = "Altered";
+                        toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringAltered") ?? "Altered!";
                         needToSave = true;
                     }
                 }
@@ -362,7 +365,7 @@ namespace MozillaBookmarksEditor
                 {
                     bookmarksJsonFile.WriteJsonFile(saveFileDialog1.FileName, root);
                     Text = saveFileDialog1.FileName;
-                    toolStripEditStatus.Text = "Saved";
+                    toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringSaved") ?? "Saved!";
                     needToSave = false;
                 }
                 catch (Exception ex)
@@ -510,7 +513,7 @@ namespace MozillaBookmarksEditor
                 editedBookmark.title = txtName.Text;
                 editedBookmark.tags = txtTags.Text;
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
-                toolStripEditStatus.Text = "Edited";
+                toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringEdited") ?? "Edited!";
                 needToSave = true;
                 if (bNew)
                 {
@@ -608,13 +611,17 @@ namespace MozillaBookmarksEditor
             }
             if (links.links.Count < 1)
             {
-                MessageBox.Show("Unable to find items under selected tree node", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    Properties.Resources.ResourceManager.GetString("StringNoItemsUnderTree") ?? "Unable to find items under selected tree node",
+                    Properties.Resources.ResourceManager.GetString("StringError") ?? "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             links.RemoveUnique();
             if (links.links.Count < 1)
             {
-                MessageBox.Show("No duplicated items found", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    Properties.Resources.ResourceManager.GetString("StringNoItemsFound") ?? "No duplicated items found",
+                    Properties.Resources.ResourceManager.GetString("StringWarning") ?? "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             SimilarBookmarksFrm smf = new SimilarBookmarksFrm(links);
@@ -635,7 +642,7 @@ namespace MozillaBookmarksEditor
                 if (deletedCount > 0)
                 {
                     updateListView(bm);
-                    toolStripEditStatus.Text = "Altered";
+                    toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringAltered") ?? "Altered!";
                     needToSave = true;
                 }
                 else
@@ -903,14 +910,14 @@ namespace MozillaBookmarksEditor
             {
                 if (treeView1.SelectedNode != null && bm != null)
                 {
-                    TreeNode tn = treeView1.SelectedNode.Nodes.Add("?");
+                    TreeNode tn = treeView1.SelectedNode.Nodes.Add(Properties.Resources.ResourceManager.GetString("StringNewItem") ?? "?");
                     tn.Tag = bm;
                 }
                 return;
             }
             if (listView1.Focused && bm != null)
             {
-                ListViewItem lvi = listView1.Items.Add("?");
+                ListViewItem lvi = listView1.Items.Add(Properties.Resources.ResourceManager.GetString("StringNewItem") ?? "?");
                 lvi.SubItems.Add(string.Empty);
                 lvi.SubItems.Add(string.Empty);
                 lvi.Tag = bm;

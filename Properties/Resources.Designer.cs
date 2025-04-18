@@ -169,5 +169,41 @@ namespace MozillaBookmarksEditor.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discard changes and exit?.
+        /// </summary>
+        internal static string StringDiscardQ {
+            get {
+                return ResourceManager.GetString("StringDiscardQ", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edited.
+        /// </summary>
+        internal static string StringEdited {
+            get {
+                return ResourceManager.GetString("StringEdited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loaded.
+        /// </summary>
+        internal static string StringLoaded {
+            get {
+                return ResourceManager.GetString("StringLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Top.
+        /// </summary>
+        internal static string StringTop {
+            get {
+                return ResourceManager.GetString("StringTop", resourceCulture);
+            }
+        }
     }
 }
