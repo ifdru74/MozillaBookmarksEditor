@@ -1,13 +1,6 @@
-using MozillaBookmarksEditor.Properties;
 using System.ComponentModel;
-using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
-using System.Reflection;
-using System.Resources;
 using System.Text;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace MozillaBookmarksEditor
 {
@@ -39,7 +32,14 @@ namespace MozillaBookmarksEditor
                 menuItemFindDuplicated.Enabled = toolStripFind.Enabled = false;
                 try
                 {
-                    bookmarksJsonFile.ReadJsonFile(openFileDialog1.FileName);
+                    if (openFileDialog1.FileName.EndsWith(".html"))
+                    {
+                        bookmarksJsonFile = HtmlFileReader.ReadHtmlFile(openFileDialog1.FileName);
+                    }
+                    else
+                    {
+                        bookmarksJsonFile.ReadJsonFile(openFileDialog1.FileName);
+                    }
                     CreateTreeNode(bookmarksJsonFile.root);
                     Text = openFileDialog1.FileName;
                     toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringLoaded") ?? "Loaded!";
@@ -82,7 +82,7 @@ namespace MozillaBookmarksEditor
             if (root.children == null) return -2;
             foreach (Bookmark child in root.children)
             {
-                if (child.getItemType()==BookmarkType.Container)
+                if (child.getItemType() == BookmarkType.Container)
                 {
                     TreeNode childNode = new TreeNode(child.title);
                     childNode.Tag = child;
@@ -161,7 +161,7 @@ namespace MozillaBookmarksEditor
                         listView1.Items.Add(lvi);
                         continue;
                     }
-                    if (bm.getItemType()==BookmarkType.Separator)
+                    if (bm.getItemType() == BookmarkType.Separator)
                     {
                         ListViewItem lvi = new ListViewItem();
                         lvi.Tag = bm;
@@ -498,7 +498,7 @@ namespace MozillaBookmarksEditor
                         bm = listView1.Tag as Bookmark;
                     }
                 }
-                if(bm!=null && bm.getItemType()==BookmarkType.Container)
+                if (bm != null && bm.getItemType() == BookmarkType.Container)
                 {
                     editedBookmark = Bookmark.MakeBookmark(Bookmark._TypeCodeURL);
                     bm.AddChild(editedBookmark);
@@ -564,7 +564,7 @@ namespace MozillaBookmarksEditor
                 txtAddress.Text =
                 txtKeywords.Text =
                 txtLabels.Text =
-                txtName.Text = 
+                txtName.Text =
                 txtTags.Text = string.Empty;
             }
             btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
@@ -828,23 +828,23 @@ namespace MozillaBookmarksEditor
 
         private void treeView1_Leave(object sender, EventArgs e)
         {
-            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
                 renameToolStripMenuItem.Enabled = toolStripRename.Enabled =
-                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = 
+                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled =
                 noneToolStripMenuItem.Enabled = false;
         }
 
         private void listView1_Enter(object sender, EventArgs e)
         {
-            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
-                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = 
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
+                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled =
                 noneToolStripMenuItem.Enabled = true;
         }
 
         private void listView1_Leave(object sender, EventArgs e)
         {
-            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
-                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled = 
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
+                invertToolStripMenuItem.Enabled = allToolStripMenuItem.Enabled =
                 noneToolStripMenuItem.Enabled = false;
         }
 
@@ -931,10 +931,15 @@ namespace MozillaBookmarksEditor
         private void txtName_Enter(object sender, EventArgs e)
         {
             toolStripCopy.Enabled = copyToolStripMenuItem.Enabled =
-            toolStripPaste.Enabled = pasteToolStripMenuItem.Enabled = 
-            toolStripCut.Enabled = cutToolStripMenuItem.Enabled = 
-            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled = 
-            deleteToolStripMenuItem.Enabled= toolStripDelete.Enabled = false;
+            toolStripPaste.Enabled = pasteToolStripMenuItem.Enabled =
+            toolStripCut.Enabled = cutToolStripMenuItem.Enabled =
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
+            deleteToolStripMenuItem.Enabled = toolStripDelete.Enabled = false;
+        }
+
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+
         }
     }
 }

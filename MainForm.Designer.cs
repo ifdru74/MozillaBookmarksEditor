@@ -793,8 +793,9 @@
             // 
             openFileDialog1.DefaultExt = "json";
             openFileDialog1.FileName = "openFileDialog1";
-            openFileDialog1.Filter = "Bookmark files|*.json";
+            openFileDialog1.Filter = "JSON Bookmark files|*.json|HTML Bookmark files|*.html";
             openFileDialog1.Title = "Open Mozilla Firefox bookmarks file";
+            openFileDialog1.FileOk += openFileDialog1_FileOk;
             // 
             // saveFileDialog1
             // 
