@@ -33,6 +33,8 @@
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             toolStripEditStatus = new ToolStripStatusLabel();
+            toolStripStatusContainers = new ToolStripStatusLabel();
+            toolStripStatusBookmarks = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openToolStripMenuItem = new ToolStripMenuItem();
@@ -116,7 +118,7 @@
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripEditStatus });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripEditStatus, toolStripStatusContainers, toolStripStatusBookmarks });
             statusStrip1.Location = new Point(0, 409);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 22);
@@ -127,18 +129,35 @@
             // 
             toolStripStatusLabel1.ImageAlign = ContentAlignment.MiddleLeft;
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(785, 17);
+            toolStripStatusLabel1.Size = new Size(680, 17);
             toolStripStatusLabel1.Spring = true;
             toolStripStatusLabel1.Text = "Ready";
             toolStripStatusLabel1.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // toolStripEditStatus
             // 
+            toolStripEditStatus.Image = Properties.Resources.product;
             toolStripEditStatus.ImageAlign = ContentAlignment.MiddleLeft;
             toolStripEditStatus.Name = "toolStripEditStatus";
-            toolStripEditStatus.Size = new Size(0, 17);
+            toolStripEditStatus.Size = new Size(16, 17);
             toolStripEditStatus.TextAlign = ContentAlignment.MiddleLeft;
             toolStripEditStatus.ToolTipText = "Editing status";
+            // 
+            // toolStripStatusContainers
+            // 
+            toolStripStatusContainers.Image = Properties.Resources.Folder_32x32;
+            toolStripStatusContainers.Name = "toolStripStatusContainers";
+            toolStripStatusContainers.Size = new Size(29, 17);
+            toolStripStatusContainers.Text = "0";
+            toolStripStatusContainers.ToolTipText = "Total container count";
+            // 
+            // toolStripStatusBookmarks
+            // 
+            toolStripStatusBookmarks.Image = Properties.Resources.Favorites_32x32;
+            toolStripStatusBookmarks.Name = "toolStripStatusBookmarks";
+            toolStripStatusBookmarks.Size = new Size(29, 17);
+            toolStripStatusBookmarks.Text = "0";
+            toolStripStatusBookmarks.ToolTipText = "Total bookmark count";
             // 
             // menuStrip1
             // 
@@ -910,5 +929,7 @@
         private ToolStripSeparator toolStripSeparator8;
         private ToolStripMenuItem selectTreeToolStripMenuItem;
         private ToolStripMenuItem selectListToolStripMenuItem;
+        private ToolStripStatusLabel toolStripStatusContainers;
+        private ToolStripStatusLabel toolStripStatusBookmarks;
     }
 }

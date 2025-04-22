@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Text;
 
@@ -15,15 +16,26 @@ namespace MozillaBookmarksEditor
         private bool clipToMove;
         Bookmark? clipSrc;
         bool needToSave;
+        string fileName;
         public MainForm()
         {
             needToSave = clipToMove = editedBookmarkChanged = editedBookmarkLocked = false;
             bookmarksJsonFile = new BookmarksJsonFile();
             lvwColumnSorter = new ListViewColumnSorter();
             clippedBoormarks = new List<Bookmark>();
+            fileName = string.Empty;
             InitializeComponent();
         }
-
+        void updateCounts()
+        {
+            BookmarksFileStat stat = new BookmarksFileStat();
+            if(bookmarksJsonFile != null && bookmarksJsonFile.root!=null)
+            {
+                stat.CountAll(bookmarksJsonFile.root);
+            }
+            toolStripStatusContainers.Text = stat.FolderCount;
+            toolStripStatusBookmarks.Text = stat.BookmarkCount;
+        }
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -32,9 +44,10 @@ namespace MozillaBookmarksEditor
                 menuItemFindDuplicated.Enabled = toolStripFind.Enabled = false;
                 try
                 {
-                    if (openFileDialog1.FileName.EndsWith(".html"))
+                    fileName = Path.GetFileName(openFileDialog1.FileName);
+                    if (fileName.EndsWith(".html"))
                     {
-                        bookmarksJsonFile = HtmlFileReader.ReadHtmlFile(openFileDialog1.FileName);
+                        bookmarksJsonFile = HtmlFileReader.ImportHtmlFile(openFileDialog1.FileName);
                     }
                     else
                     {
@@ -43,7 +56,9 @@ namespace MozillaBookmarksEditor
                     CreateTreeNode(bookmarksJsonFile.root);
                     Text = openFileDialog1.FileName;
                     toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringLoaded") ?? "Loaded!";
+                    toolStripEditStatus.Image = Properties.Resources.Package_Download;
                     needToSave = false;
+                    updateCounts();
                 }
                 catch (Exception ex)
                 {
@@ -327,7 +342,9 @@ namespace MozillaBookmarksEditor
                             treeView1.SelectedNode = pn;
                             pn.Nodes.Remove(sn);
                             toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringAltered") ?? "Altered!";
+                            toolStripEditStatus.Image = Properties.Resources.Package_Accept;
                             needToSave = true;
+                            updateCounts();
                             return;
                         }
                     }
@@ -345,10 +362,12 @@ namespace MozillaBookmarksEditor
                         listView1.Items.Remove(lvi);
                         folder.Remove(item);
                         toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringAltered") ?? "Altered!";
+                        toolStripEditStatus.Image = Properties.Resources.Package_Accept;
                         needToSave = true;
                     }
                 }
             }
+            updateCounts();
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -358,19 +377,23 @@ namespace MozillaBookmarksEditor
             if (rootNode == null) { return; }
             Bookmark? root = rootNode.Tag as Bookmark;
             if (root == null) { return; }
+            saveFileDialog1.FileName = Path.GetFileNameWithoutExtension(fileName);
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                menuItemFindDuplicated.Enabled = toolStripFind.Enabled = false;
                 try
                 {
                     bookmarksJsonFile.WriteJsonFile(saveFileDialog1.FileName, root);
                     Text = saveFileDialog1.FileName;
                     toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringSaved") ?? "Saved!";
+                    toolStripEditStatus.Image = Properties.Resources.product;
                     needToSave = false;
+                    updateCounts();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, ex.Source, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    menuItemFindDuplicated.Enabled = toolStripFind.Enabled = false;
+                    toolStripEditStatus.Image = Properties.Resources.Package_Warning;
                 }
             }
         }
@@ -503,6 +526,7 @@ namespace MozillaBookmarksEditor
                     editedBookmark = Bookmark.MakeBookmark(Bookmark._TypeCodeURL);
                     bm.AddChild(editedBookmark);
                     bNew = true;
+                    updateCounts();
                 }
             }
             if (editedBookmark != null)
@@ -513,7 +537,13 @@ namespace MozillaBookmarksEditor
                 editedBookmark.title = txtName.Text;
                 editedBookmark.tags = txtTags.Text;
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+                toolStripCopy.Enabled = copyToolStripMenuItem.Enabled =
+                toolStripPaste.Enabled = pasteToolStripMenuItem.Enabled =
+                toolStripCut.Enabled = cutToolStripMenuItem.Enabled =
+                addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
+                deleteToolStripMenuItem.Enabled = toolStripDelete.Enabled = true;
                 toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringEdited") ?? "Edited!";
+                toolStripEditStatus.Image = Properties.Resources.Package_Accept;
                 needToSave = true;
                 if (bNew)
                 {
@@ -546,6 +576,11 @@ namespace MozillaBookmarksEditor
                 txtName.Text =
                 txtTags.Text = string.Empty;
                 btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+                toolStripCopy.Enabled = copyToolStripMenuItem.Enabled =
+                toolStripPaste.Enabled = pasteToolStripMenuItem.Enabled =
+                toolStripCut.Enabled = cutToolStripMenuItem.Enabled =
+                addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
+                deleteToolStripMenuItem.Enabled = toolStripDelete.Enabled = true;
             }
         }
 
@@ -568,6 +603,11 @@ namespace MozillaBookmarksEditor
                 txtTags.Text = string.Empty;
             }
             btnRevert.Enabled = btnStore.Enabled = editedBookmarkChanged = false;
+            toolStripCopy.Enabled = copyToolStripMenuItem.Enabled =
+            toolStripPaste.Enabled = pasteToolStripMenuItem.Enabled =
+            toolStripCut.Enabled = cutToolStripMenuItem.Enabled =
+            addNewToolStripMenuItem.Enabled = toolStripAdd.Enabled =
+            deleteToolStripMenuItem.Enabled = toolStripDelete.Enabled = true;
         }
         void iterateContainer(SimilarLinks links, Bookmark cont, string bmPath)
         {
@@ -614,6 +654,7 @@ namespace MozillaBookmarksEditor
                 MessageBox.Show(
                     Properties.Resources.ResourceManager.GetString("StringNoItemsUnderTree") ?? "Unable to find items under selected tree node",
                     Properties.Resources.ResourceManager.GetString("StringError") ?? "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                toolStripEditStatus.Image = Properties.Resources.Package_Warning;
                 return;
             }
             links.RemoveUnique();
@@ -622,6 +663,7 @@ namespace MozillaBookmarksEditor
                 MessageBox.Show(
                     Properties.Resources.ResourceManager.GetString("StringNoItemsFound") ?? "No duplicated items found",
                     Properties.Resources.ResourceManager.GetString("StringWarning") ?? "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                toolStripEditStatus.Image = Properties.Resources.Package_Warning;
                 return;
             }
             SimilarBookmarksFrm smf = new SimilarBookmarksFrm(links);
@@ -643,11 +685,14 @@ namespace MozillaBookmarksEditor
                 {
                     updateListView(bm);
                     toolStripEditStatus.Text = Properties.Resources.ResourceManager.GetString("StringAltered") ?? "Altered!";
+                    toolStripEditStatus.Image = Properties.Resources.Package_Add;
                     needToSave = true;
+                    updateCounts();
                 }
                 else
                 {
-                    MessageBox.Show("No items selected for removal", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(Properties.Resources.ResourceManager.GetString("StringNoItemsToRemove") ??"No items selected for removal", 
+                        Properties.Resources.ResourceManager.GetString("StringWarning") ?? "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -911,13 +956,16 @@ namespace MozillaBookmarksEditor
                 if (treeView1.SelectedNode != null && bm != null)
                 {
                     TreeNode tn = treeView1.SelectedNode.Nodes.Add(Properties.Resources.ResourceManager.GetString("StringNewItem") ?? "?");
+                    toolStripEditStatus.Image = Properties.Resources.Package_Add;
                     tn.Tag = bm;
                 }
+                updateCounts();
                 return;
             }
             if (listView1.Focused && bm != null)
             {
                 ListViewItem lvi = listView1.Items.Add(Properties.Resources.ResourceManager.GetString("StringNewItem") ?? "?");
+                toolStripEditStatus.Image = Properties.Resources.Package_Add;
                 lvi.SubItems.Add(string.Empty);
                 lvi.SubItems.Add(string.Empty);
                 lvi.Tag = bm;
@@ -926,6 +974,7 @@ namespace MozillaBookmarksEditor
                 lvi.Selected = true;
                 lvi.ImageIndex = 1;
             }
+            updateCounts();
         }
 
         private void txtName_Enter(object sender, EventArgs e)

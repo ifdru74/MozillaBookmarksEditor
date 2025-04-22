@@ -1,8 +1,45 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.AxHost;
 
 namespace MozillaBookmarksEditor
 {
+    public class BookmarksFileStat
+    {
+        int folders;
+        int bookmarks;
+        public BookmarksFileStat()
+        {
+            folders = bookmarks = 0;
+        }
+        public void IncFolders() { folders++; }
+        public void IncBookmarks() { bookmarks++; }
+        public void CountChildren(List<Bookmark>? children)
+        {
+            if (children == null)
+            {
+                return;
+            }
+            foreach (Bookmark? bookmark in children)
+            {
+                if (bookmark != null)
+                {
+                    switch (bookmark.getItemType())
+                    {
+                        case BookmarkType.Container:
+                            folders ++;
+                            CountChildren(bookmark.children);
+                            break;
+                        case BookmarkType.URL:
+                            bookmarks ++; break;
+                    }
+                }
+            }
+        }
+        public void CountAll(Bookmark root) => CountChildren(root.children);
+        public string FolderCount { get => folders.ToString(); }
+        public string BookmarkCount { get => bookmarks.ToString(); }
+    }
     internal class BookmarksJsonFile
     {
         public Bookmark root { get; set; }

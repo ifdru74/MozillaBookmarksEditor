@@ -21,7 +21,7 @@ namespace MozillaBookmarksEditor
             }
             return rt;
         }
-        public static BookmarksJsonFile ReadHtmlFile(string filePath)
+        public static BookmarksJsonFile ImportHtmlFile(string filePath)
         {
             int rowNum = 0;
             bool bMainFolded = false;
@@ -64,9 +64,7 @@ namespace MozillaBookmarksEditor
                     m = Regex.Match(line, pMainFolder);
                     if (m.Success)
                     {
-                        Bookmark bm = new Bookmark();
-                        bm.type = Bookmark._TypeStringContainer;
-                        bm.typeCode = Bookmark._TypeCodeContainer;
+                        Bookmark bm = Bookmark.MakeBookmark(Bookmark._TypeCodeContainer);
                         bm.dateAdded = stringToTime(m.Groups["adate"].Value);
                         bm.lastModified = stringToTime(m.Groups["mdate"].Value);
                         bm.title = m.Groups["title"].Value;
@@ -81,9 +79,7 @@ namespace MozillaBookmarksEditor
                 m = Regex.Match(line, pFolder);
                 if (m.Success)
                 {
-                    Bookmark bm = new Bookmark();
-                    bm.type = Bookmark._TypeStringContainer;
-                    bm.typeCode = Bookmark._TypeCodeContainer;
+                    Bookmark bm = Bookmark.MakeBookmark(Bookmark._TypeCodeContainer);
                     bm.dateAdded = stringToTime(m.Groups["adate"].Value);
                     bm.lastModified = stringToTime(m.Groups["mdate"].Value);
                     bm.title = m.Groups["title"].Value;
@@ -106,9 +102,7 @@ namespace MozillaBookmarksEditor
                 m = Regex.Match(line, pBookMark);
                 if (m.Success)
                 {
-                    Bookmark bm = new Bookmark();
-                    bm.type = Bookmark._TypeStringURL;
-                    bm.typeCode = Bookmark._TypeCodeURL;
+                    Bookmark bm = Bookmark.MakeBookmark(Bookmark._TypeCodeURL);
                     bm.dateAdded = stringToTime(m.Groups["adate"].Value);
                     bm.lastModified = (int)DateTime.Now.Ticks / 1000;
                     bm.title = m.Groups["title"].Value;

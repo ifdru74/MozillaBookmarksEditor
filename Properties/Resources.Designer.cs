@@ -103,6 +103,26 @@ namespace MozillaBookmarksEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Edit_32x32 {
+            get {
+                object obj = ResourceManager.GetObject("Edit_32x32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Favorites_32x32 {
+            get {
+                object obj = ResourceManager.GetObject("Favorites_32x32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Folder_32x32 {
             get {
                 object obj = ResourceManager.GetObject("Folder_32x32", resourceCulture);
@@ -133,9 +153,69 @@ namespace MozillaBookmarksEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap New_32x32 {
+            get {
+                object obj = ResourceManager.GetObject("New_32x32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Package_Accept {
+            get {
+                object obj = ResourceManager.GetObject("Package-Accept", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Package_Add {
+            get {
+                object obj = ResourceManager.GetObject("Package-Add", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Package_Download {
+            get {
+                object obj = ResourceManager.GetObject("Package-Download", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Package_Warning {
+            get {
+                object obj = ResourceManager.GetObject("Package-Warning", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Paste_32x32 {
             get {
                 object obj = ResourceManager.GetObject("Paste_32x32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap product {
+            get {
+                object obj = ResourceManager.GetObject("product", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -171,6 +251,15 @@ namespace MozillaBookmarksEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Altered.
+        /// </summary>
+        internal static string StringAltered {
+            get {
+                return ResourceManager.GetString("StringAltered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard changes and exit?.
         /// </summary>
         internal static string StringDiscardQ {
@@ -198,11 +287,47 @@ namespace MozillaBookmarksEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No duplicates has been found..
+        /// </summary>
+        internal static string StringNoItemsFound {
+            get {
+                return ResourceManager.GetString("StringNoItemsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No items selected for removal..
+        /// </summary>
+        internal static string StringNoItemsToRemove {
+            get {
+                return ResourceManager.GetString("StringNoItemsToRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saved.
+        /// </summary>
+        internal static string StringSaved {
+            get {
+                return ResourceManager.GetString("StringSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Top.
         /// </summary>
         internal static string StringTop {
             get {
                 return ResourceManager.GetString("StringTop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        internal static string StringWarning {
+            get {
+                return ResourceManager.GetString("StringWarning", resourceCulture);
             }
         }
     }
