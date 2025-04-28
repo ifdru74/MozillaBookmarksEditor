@@ -129,7 +129,7 @@
             // 
             toolStripStatusLabel1.ImageAlign = ContentAlignment.MiddleLeft;
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(680, 17);
+            toolStripStatusLabel1.Size = new Size(711, 17);
             toolStripStatusLabel1.Spring = true;
             toolStripStatusLabel1.Text = "Ready";
             toolStripStatusLabel1.TextAlign = ContentAlignment.MiddleLeft;
@@ -549,6 +549,7 @@
             // 
             // treeView1
             // 
+            treeView1.AllowDrop = true;
             treeView1.Dock = DockStyle.Fill;
             treeView1.FullRowSelect = true;
             treeView1.HideSelection = false;
@@ -567,6 +568,9 @@
             treeView1.AfterLabelEdit += treeView1_AfterLabelEdit;
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
+            treeView1.DragDrop += treeView1_DragDrop;
+            treeView1.DragEnter += treeView1_DragEnter;
+            treeView1.DragOver += treeView1_DragOver;
             treeView1.Enter += treeView1_Enter;
             treeView1.Leave += treeView1_Leave;
             // 
@@ -618,6 +622,7 @@
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
             listView1.Enter += listView1_Enter;
             listView1.Leave += listView1_Leave;
+            listView1.MouseDown += listView1_MouseDown;
             // 
             // columnHeaderName
             // 

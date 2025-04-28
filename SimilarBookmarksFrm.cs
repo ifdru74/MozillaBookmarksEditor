@@ -1,4 +1,6 @@
-﻿namespace MozillaBookmarksEditor
+﻿using System.Web;
+
+namespace MozillaBookmarksEditor
 {
     public partial class SimilarBookmarksFrm : Form
     {
@@ -14,17 +16,18 @@
             TreeNode root = treeView1.Nodes.Add("Links");
             foreach (string uri in links.links.Keys)
             {
-                TreeNode node = root.Nodes.Add(uri);
+                TreeNode node = root.Nodes.Add(HttpUtility.UrlDecode(uri), uri);
                 node.ImageIndex = 1;
                 bool bChecked = false;
                 foreach (BookmarkWithPath bmwp in links.links[uri])
                 {
-                    TreeNode bmNode = node.Nodes.Add(bmwp.ToString());
+                    TreeNode bmNode = node.Nodes.Add(bmwp.Bookmark.uri);
                     bmNode.Tag = bmwp;
                     bmNode.Checked = bChecked;
                     if (!bChecked)
                     {
                         bChecked = true;
+                        node.Text = bmwp.Bookmark.uri;
                         bmNode.ImageIndex = 2;
                     }
                     else

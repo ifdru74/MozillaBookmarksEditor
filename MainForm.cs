@@ -17,6 +17,7 @@ namespace MozillaBookmarksEditor
         Bookmark? clipSrc;
         bool needToSave;
         string fileName;
+        DrugData? dragged;
         public MainForm()
         {
             needToSave = clipToMove = editedBookmarkChanged = editedBookmarkLocked = false;
@@ -24,12 +25,13 @@ namespace MozillaBookmarksEditor
             lvwColumnSorter = new ListViewColumnSorter();
             clippedBoormarks = new List<Bookmark>();
             fileName = string.Empty;
+            dragged = null;
             InitializeComponent();
         }
         void updateCounts()
         {
             BookmarksFileStat stat = new BookmarksFileStat();
-            if(bookmarksJsonFile != null && bookmarksJsonFile.root!=null)
+            if (bookmarksJsonFile != null && bookmarksJsonFile.root != null)
             {
                 stat.CountAll(bookmarksJsonFile.root);
             }
@@ -197,6 +199,7 @@ namespace MozillaBookmarksEditor
                 return;
             }
             updateListView(e.Node.Tag as Bookmark);
+            listView1.Tag = e.Node.Tag;
             // fill status bar
             toolStripStatusLabel1.Text = e.Node.FullPath.Substring(3);
         }
@@ -620,7 +623,7 @@ namespace MozillaBookmarksEditor
                 switch (bm.getItemType())
                 {
                     case BookmarkType.URL:
-                        links.Add(bm, bmPath);
+                        links.Add(bm, bmPath, cont);
                         break;
                     case BookmarkType.Container:
                         iterateContainer(links, bm, bmPath + "/" + bm.title);
@@ -676,7 +679,14 @@ namespace MozillaBookmarksEditor
                     {
                         if (bmwp.Checked)
                         {
-                            deleteBookmarkByTreePath(bmwp.Bookmark, bmwp.Path);
+                            if (bmwp.parentBm != null)
+                            {
+                                bmwp.parentBm.Remove(bmwp.Bookmark);
+                            }
+                            else
+                            {
+                                deleteBookmarkByTreePath(bmwp.Bookmark, bmwp.Path);
+                            }
                             deletedCount++;
                         }
                     }
@@ -691,7 +701,7 @@ namespace MozillaBookmarksEditor
                 }
                 else
                 {
-                    MessageBox.Show(Properties.Resources.ResourceManager.GetString("StringNoItemsToRemove") ??"No items selected for removal", 
+                    MessageBox.Show(Properties.Resources.ResourceManager.GetString("StringNoItemsToRemove") ?? "No items selected for removal",
                         Properties.Resources.ResourceManager.GetString("StringWarning") ?? "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -989,6 +999,159 @@ namespace MozillaBookmarksEditor
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
 
+        }
+
+        private void listView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                dragged = new DrugData(listView1.Tag as Bookmark);
+                foreach (ListViewItem lvi in listView1.SelectedItems)
+                {
+                    dragged.AddBookmark(lvi.Tag as Bookmark);
+                }
+                if (Control.ModifierKeys == Keys.Shift)
+                {
+                    listView1.DoDragDrop(dragged, DragDropEffects.Copy);
+                }
+                else
+                {
+                    listView1.DoDragDrop(dragged, DragDropEffects.Move);
+                }
+            }
+            else
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    dragged = new DrugData(listView1.Tag as Bookmark);
+                    foreach (ListViewItem lvi in listView1.SelectedItems)
+                    {
+                        dragged.AddBookmark(lvi.Tag as Bookmark);
+                    }
+                    if (Control.ModifierKeys == Keys.Shift)
+                    {
+                        listView1.DoDragDrop(dragged, DragDropEffects.Move);
+                    }
+                    else
+                    {
+                        listView1.DoDragDrop(dragged, DragDropEffects.Copy);
+                    }
+                }
+            }
+        }
+        bool pointWithinBounds(Point p, Rectangle r)
+        {
+            if (r.Y < p.Y && (r.Y + r.Height) > p.Y)
+            {
+                if (r.X < p.X && (r.X + r.Width) > p.X)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Microsoft's HitTest(), returning TreeViewHitTestInfo
+         * doesn not work properly and I don't know how to make it work
+         * So, I have to create my own implementation for TreeView nodes :-(
+         */
+        TreeNode? findNodeByCoord(TreeNodeCollection nodes, Point coord)
+        {
+            TreeNode? node = null;
+            foreach (TreeNode tn in nodes)
+            {
+                Debug.WriteLine($"Node bounds {tn.Text}=>({tn.Bounds})");
+                if (pointWithinBounds(coord, tn.Bounds))
+                {
+                    node = tn;
+                    break;
+                }
+                if (tn.IsExpanded)
+                {
+                    node = findNodeByCoord(tn.Nodes, coord);
+                    if (node != null)
+                    {
+                        break;
+                    }
+                }
+            }
+            return node;
+        }
+        private void treeView1_DragDrop(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine($"Screen coordinates (X:{e.X}, Y:{e.Y})");
+            Point p = treeView1.PointToClient(new Point(e.X, e.Y));
+            Debug.WriteLine($"Tree coordinates (X:{p.X}, Y:{p.Y})");
+            TreeNode? hitNode = findNodeByCoord(treeView1.Nodes, p);
+
+            if (hitNode == null)
+            {
+                Debug.WriteLine("Node hit not detected");
+                return;
+            }
+
+            if (dragged != null && dragged.parentBm != null)
+            {
+                if (hitNode != null)
+                {
+                    Debug.WriteLine($"Using node:{hitNode.Text}");
+                    Bookmark? dest = hitNode.Tag as Bookmark;
+                    if (dest != null)
+                    {
+                        if (dest != dragged.parentBm)
+                        {
+                            Debug.WriteLine($"Destination:{dest.title}");
+                            foreach (Bookmark b in dragged.bookmarks)
+                            {
+                                dest.AddChild(b);
+                            }
+                            if ((e.AllowedEffect & DragDropEffects.Move) == DragDropEffects.Move)
+                            {
+                                foreach (Bookmark b in dragged.bookmarks)
+                                {
+                                    dragged.parentBm.Remove(b);
+                                }
+                            }
+                            treeView1.SelectedNode = hitNode;
+                        }
+                        dragged = null;
+                    }
+                }
+            }
+        }
+
+        private void treeView1_DragEnter(object sender, DragEventArgs e)
+        {
+            if ((e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+            {
+                e.Effect = DragDropEffects.Copy;
+                e.DropImageType = DropImageType.Copy;
+            }
+            if ((e.AllowedEffect & DragDropEffects.Move) == DragDropEffects.Move)
+            {
+                e.Effect = DragDropEffects.Move;
+                e.DropImageType = DropImageType.Move;
+            }
+        }
+
+        private void treeView1_DragOver(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine($"Screen coordinates (X:{e.X}, Y:{e.Y})");
+            Point p = treeView1.PointToClient(new Point(e.X, e.Y));
+            Debug.WriteLine($"Tree coordinates (X:{p.X}, Y:{p.Y})");
+            TreeNode? hitNode = findNodeByCoord(treeView1.Nodes, p);
+
+            if (hitNode == null)
+            {
+                Debug.WriteLine("Node hit not detected");
+                return;
+            }
+            if (!hitNode.IsExpanded)
+            {
+                Debug.WriteLine("Hit node expanded");
+                hitNode.Expand();
+            }
         }
     }
 }
