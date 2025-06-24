@@ -90,6 +90,7 @@ jobs:
       env:
       #   Appx_Bundle: Always
          Appx_Bundle_Platforms: x64
+         Configuration: Release # set this every time you need it!
       #   Appx_Package_Build_Mode: StoreUpload
       #   Configuration: ${{ matrix.configuration }}
 
